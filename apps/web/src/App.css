@@ -1,0 +1,2387 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+
+/* =====================================================
+   INTRO
+===================================================== */
+
+.intro {
+  position: relative;
+
+  width: 100vw;
+  height: 100dvh;
+
+  overflow: hidden;
+
+  background:
+    #eee8de;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* =====================================================
+   PHOTO REEL
+===================================================== */
+
+.auction-reel {
+  position: absolute;
+
+  inset: -22%;
+
+  z-index: 1;
+
+  min-width: 145vw;
+  min-height: 145vh;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(150px, 1fr));
+
+  grid-auto-rows:
+    clamp(190px, 28vh, 330px);
+
+  gap: 12px;
+
+  transform:
+    rotate(-5deg)
+    scale(1.08);
+
+  animation:
+    reelMove 1.8s
+    linear
+    infinite;
+
+  will-change:
+    transform,
+    filter;
+}
+
+.auction-image {
+  position: relative;
+
+  overflow: hidden;
+
+  border-radius: 8px;
+
+  background:
+    #d5cdc1;
+
+  box-shadow:
+    0 15px 40px
+    rgba(58,43,49,0.12);
+}
+
+.auction-image:nth-child(3n) {
+  transform:
+    translateY(22px);
+}
+
+.auction-image:nth-child(5n) {
+  transform:
+    translateY(-20px);
+}
+
+.auction-image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+  transform:
+    scale(1.07);
+}
+
+@keyframes reelMove {
+
+  from {
+    transform:
+      rotate(-5deg)
+      scale(1.08)
+      translate3d(0,0,0);
+  }
+
+  to {
+    transform:
+      rotate(-5deg)
+      scale(1.08)
+      translate3d(-9%,-18%,0);
+  }
+}
+
+
+/* =====================================================
+   PHOTO OVERLAY
+===================================================== */
+
+.photo-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(242,235,223,0.17),
+      rgba(103,67,117,0.09)
+    );
+
+  mix-blend-mode:
+    soft-light;
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   GLOSS
+===================================================== */
+
+.gloss {
+  position: absolute;
+
+  width: 25%;
+  height: 180%;
+
+  left: -90%;
+  top: -40%;
+
+  transform:
+    rotate(18deg);
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,250,241,0.08),
+      rgba(255,250,241,0.55),
+      rgba(255,250,241,0.08),
+      transparent
+    );
+
+  mix-blend-mode:
+    screen;
+
+  animation:
+    glossMove 0.75s
+    linear
+    infinite;
+
+  pointer-events: none;
+}
+
+@keyframes glossMove {
+
+  from {
+    left: -90%;
+  }
+
+  to {
+    left: 180%;
+  }
+}
+
+
+/* =====================================================
+   CREAM WASH
+===================================================== */
+
+.cream-wash {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 3;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(244,237,226,0.05),
+      rgba(235,226,214,0.18)
+    );
+
+  mix-blend-mode:
+    screen;
+}
+
+.lens-black {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.04) 0%,
+      rgba(0, 0, 0, 0.10) 35%,
+      rgba(0, 0, 0, 0.20) 62%,
+      rgba(0, 0, 0, 0.42) 82%,
+      rgba(0, 0, 0, 0.58) 100%
+    );
+
+  box-shadow:
+    inset 0 0 180px
+    rgba(0, 0, 0, 0.45);
+}
+
+/* =====================================================
+   PURPLE WASH
+===================================================== */
+
+.purple-wash {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 4;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 15% 30%,
+      rgba(124,82,154,0.10),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at 85% 70%,
+      rgba(112,68,147,0.08),
+      transparent 30%
+    );
+}
+
+
+/* =====================================================
+   PURPLE STREAKS
+===================================================== */
+
+.purple-streak {
+  position: absolute;
+
+  z-index: 8;
+
+  width: 38vw;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(118,73,151,0.42),
+      transparent
+    );
+
+  box-shadow:
+    0 0 14px
+    rgba(118,73,151,0.15);
+}
+
+.streak-one {
+  top: 31%;
+
+  animation:
+    streakOne 1.2s
+    ease-in-out
+    infinite;
+}
+
+.streak-two {
+  top: 69%;
+
+  animation:
+    streakTwo 1.05s
+    ease-in-out
+    infinite;
+}
+
+@keyframes streakOne {
+
+  from {
+    left: -45%;
+    transform: rotate(-6deg);
+  }
+
+  to {
+    left: 110%;
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes streakTwo {
+
+  from {
+    left: 110%;
+    transform: rotate(5deg);
+  }
+
+  to {
+    left: -45%;
+    transform: rotate(5deg);
+  }
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.brand {
+  position: absolute;
+
+  z-index: 25;
+
+  top:
+    clamp(16px,3vh,28px);
+
+  left:
+    clamp(16px,3vw,32px);
+
+  padding:
+    10px 14px;
+
+  border-radius: 8px;
+
+  background:
+    rgba(245,239,229,0.78);
+
+  border:
+    1px solid
+    rgba(82,59,93,0.10);
+
+  box-shadow:
+    0 10px 30px
+    rgba(55,38,58,0.08);
+
+  backdrop-filter:
+    blur(12px);
+}
+
+.brand-name {
+  color:
+    #75429a;
+
+  font-size:
+    clamp(24px,2.3vw,31px);
+
+  font-weight: 900;
+
+  letter-spacing:
+    -2px;
+
+  text-shadow:
+    0 4px 18px
+    rgba(117,66,154,0.18);
+}
+
+.brand-tagline {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  margin-top: 6px;
+
+  color:
+    #71428d;
+
+  font-size: 7px;
+
+  font-weight: 850;
+
+  letter-spacing: 2.2px;
+}
+
+.brand-tagline span {
+  width: 12px;
+  height: 1px;
+
+  background:
+    #8b5ca3;
+}
+
+
+/* =====================================================
+   CLOCK SECTION
+===================================================== */
+
+.clock-section {
+  position: relative;
+
+  z-index: 20;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+.clock-glow {
+  position: absolute;
+
+  width:
+    clamp(220px,25vw,320px);
+
+  height:
+    clamp(220px,25vw,320px);
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(119,77,145,0.09),
+      transparent 68%
+    );
+
+  filter:
+    blur(28px);
+}
+
+
+/* =====================================================
+   BLENDED CLOCK
+===================================================== */
+
+.auction-clock {
+  position: relative;
+
+  width:
+    clamp(155px,17vw,215px);
+
+  height:
+    clamp(155px,17vw,215px);
+
+  padding: 3px;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(250,244,235,0.48),
+      rgba(137,101,151,0.30),
+      rgba(232,221,210,0.42)
+    );
+
+  border:
+    1px solid
+    rgba(117,66,154,0.24);
+
+  box-shadow:
+    0 15px 40px
+    rgba(83,55,91,0.10),
+
+    inset 0 0 25px
+    rgba(255,255,255,0.16);
+
+  opacity: 1;
+
+  backdrop-filter:
+    blur(10px);
+}
+
+.clock-face {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 40% 35%,
+      rgba(250,244,235,0.38),
+      rgba(188,169,185,0.28)
+    );
+
+  border:
+    1px solid
+    rgba(117,66,154,0.14);
+
+  box-shadow:
+    inset 0 0 28px
+    rgba(88,58,96,0.07);
+}
+
+
+/* =====================================================
+   CLOCK TEXT
+===================================================== */
+
+.clock-brand {
+  position: absolute;
+
+  top: 17%;
+
+  width: 100%;
+
+  text-align: center;
+
+  color:
+    rgba(93,59,108,0.64);
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.7px;
+}
+
+.clock-caption {
+  position: absolute;
+
+  top: 24%;
+
+  width: 100%;
+
+  text-align: center;
+
+  color:
+    rgba(118,96,122,0.65);
+
+  font-size: 4px;
+
+  letter-spacing: 1.2px;
+}
+
+
+/* =====================================================
+   CLOCK TICKS
+===================================================== */
+
+.clock-tick {
+  position: absolute;
+
+  left:
+    calc(50% - 1px);
+
+  top: 4px;
+
+  width: 1px;
+  height: 5px;
+
+  background:
+    rgba(78,59,82,0.25);
+
+  transform-origin:
+    1px 47%;
+}
+
+.clock-tick.major {
+  width: 2px;
+  height: 8px;
+
+  background:
+    rgba(76,52,81,0.46);
+}
+
+
+/* =====================================================
+   ROMAN NUMBERS
+===================================================== */
+
+.roman {
+  position: absolute;
+
+  color:
+    rgba(102,84,104,0.72);
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 8px;
+
+  font-weight: 600;
+}
+
+.r12 {
+  top: 8%;
+
+  left: 50%;
+
+  transform:
+    translateX(-50%);
+}
+
+.r3 {
+  right: 8%;
+
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+}
+
+.r6 {
+  bottom: 8%;
+
+  left: 50%;
+
+  transform:
+    translateX(-50%);
+}
+
+.r9 {
+  left: 8%;
+
+  top: 50%;
+
+  transform:
+    translateY(-50%);
+}
+
+
+/* =====================================================
+   MINI DIALS
+===================================================== */
+
+.small-dial {
+  position: absolute;
+
+  width:
+    clamp(25px,3vw,35px);
+
+  height:
+    clamp(25px,3vw,35px);
+
+  border-radius: 50%;
+
+  border:
+    1px solid
+    rgba(85,62,91,0.15);
+}
+
+.small-dial.left {
+  left: 20%;
+  bottom: 18%;
+}
+
+.small-dial.right {
+  right: 20%;
+  bottom: 18%;
+}
+
+.small-dial span {
+  position: absolute;
+
+  left: 50%;
+  bottom: 50%;
+
+  width: 1px;
+  height: 40%;
+
+  background:
+    #80549a;
+
+  transform-origin:
+    bottom center;
+
+  transform:
+    rotate(35deg);
+}
+
+
+/* =====================================================
+   GAVEL
+===================================================== */
+
+.gavel-hand {
+  position: absolute;
+
+  left: 50%;
+  bottom: 50%;
+
+  width: 2px;
+  height: 38%;
+
+  transform-origin:
+    center bottom;
+
+  z-index: 10;
+}
+
+.gavel-stick {
+  position: absolute;
+
+  left: -1px;
+  bottom: 0;
+
+  width: 3px;
+  height: 83%;
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #71468b,
+      #9d72ae,
+      #6b4181
+    );
+}
+
+.gavel-head {
+  position: absolute;
+
+  top: -3px;
+
+  left:
+    clamp(-15px,-1.4vw,-10px);
+
+  width:
+    clamp(26px,2.8vw,35px);
+
+  height:
+    clamp(13px,1.7vw,18px);
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #684177,
+      #9c6db0,
+      #674073
+    );
+
+  box-shadow:
+    0 3px 8px
+    rgba(82,52,91,0.18);
+}
+
+.gavel-head::before,
+.gavel-head::after {
+  content: "";
+
+  position: absolute;
+
+  top: 2px;
+
+  width: 3px;
+  height: 75%;
+
+  background:
+    #5c3869;
+
+  border-radius: 2px;
+}
+
+.gavel-head::before {
+  left: -2px;
+}
+
+.gavel-head::after {
+  right: -2px;
+}
+
+.gavel-head span {
+  position: absolute;
+
+  left: 28%;
+  top: 48%;
+
+  width: 44%;
+  height: 1px;
+
+  background:
+    rgba(255,250,239,0.55);
+}
+
+
+/* =====================================================
+   CLOCK CENTER
+===================================================== */
+
+.clock-center {
+  position: absolute;
+
+  left:
+    calc(50% - 5px);
+
+  top:
+    calc(50% - 5px);
+
+  width: 10px;
+  height: 10px;
+
+  border-radius: 50%;
+
+  background:
+    #58465b;
+
+  border:
+    2px solid
+    #9063a4;
+
+  z-index: 15;
+}
+
+.clock-center span {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: 2px;
+  height: 2px;
+
+  transform:
+    translate(-50%,-50%);
+
+  border-radius: 50%;
+
+  background:
+    #fff7eb;
+}
+
+
+/* =====================================================
+   LIVE CAPTION
+===================================================== */
+
+.live-caption {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 11px;
+
+  color:
+    #67596a;
+
+  font-size: 7px;
+
+  font-weight: 800;
+
+  letter-spacing: 2.3px;
+}
+
+.live-caption span {
+  width: 12px;
+  height: 1px;
+
+  background:
+    rgba(126,80,151,0.42);
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+.login {
+  position: fixed;
+
+  inset: 0;
+
+  width: 100vw;
+  height: 100dvh;
+
+  min-height: 100dvh;
+
+  overflow: hidden;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f0e9df 0%,
+      #e5d9e9 48%,
+      #eee7de 100%
+    );
+
+  animation:
+    loginReveal .42s
+    cubic-bezier(.22,1,.36,1);
+}
+
+@keyframes loginReveal {
+
+  from {
+    opacity: 0;
+
+    transform:
+      scale(1.02);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      scale(1);
+  }
+}
+
+
+/* =====================================================
+   LOGIN BACKGROUND
+===================================================== */
+
+.login::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(119,72,151,0.11),
+      transparent 27%
+    ),
+
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(119,72,151,0.08),
+      transparent 25%
+    );
+
+  pointer-events: none;
+}
+
+.login::after {
+  content: "";
+
+  position: absolute;
+
+  width: 65vw;
+  height: 65vw;
+
+  border-radius: 50%;
+
+  border:
+    1px solid
+    rgba(112,75,134,0.08);
+
+  left: -30vw;
+  top: -30vw;
+
+  pointer-events: none;
+}
+
+
+/* =====================================================
+   LOGIN CONTENT
+===================================================== */
+
+.login-content {
+  position: relative;
+
+  z-index: 5;
+
+  width:
+    min(590px, calc(100vw - 40px));
+
+  min-height: 100dvh;
+
+  padding:
+    clamp(22px, 4vh, 42px) 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: safe center;
+
+  overflow: visible;
+}
+
+
+/* =====================================================
+   LOGIN BRAND
+===================================================== */
+
+.login-brand {
+  color:
+    #75429a;
+
+  font-size:
+    clamp(30px,3vw,38px);
+
+  font-weight: 900;
+
+  letter-spacing:
+    -2.5px;
+
+  text-shadow:
+    0 5px 18px
+    rgba(117,66,154,0.12);
+}
+
+.login-live {
+  align-self: flex-start;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  margin-top: 7px;
+
+  color:
+    #75468f;
+
+  font-size: 7px;
+
+  font-weight: 850;
+
+  letter-spacing: 2px;
+}
+
+.login-live span {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background:
+    #75468f;
+}
+
+
+/* =====================================================
+   LOGIN HEADER
+===================================================== */
+
+.login-eyebrow {
+  margin-top:
+    clamp(30px,6vh,65px);
+
+  color:
+    #71428d;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing: 2.5px;
+}
+
+.login-content h1 {
+  margin:
+    10px 0 14px;
+
+  color:
+    #2e2830;
+
+  font-size:
+    clamp(56px,6.5vw,82px);
+
+  line-height:
+    0.84;
+
+  letter-spacing:
+    -5px;
+}
+
+.login-content h1 em {
+  color:
+    #70428c;
+
+  font-style:
+    normal;
+}
+
+.login-description {
+  max-width: 470px;
+
+  margin:
+    0 0 24px;
+
+  color:
+    #776d78;
+
+  font-size: 14px;
+
+  line-height: 1.55;
+}
+
+
+/* =====================================================
+   LOGIN FIELDS
+===================================================== */
+
+.login-field {
+  margin-bottom:
+    13px;
+}
+
+.login-field label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color:
+    #514953;
+
+  font-size: 10px;
+
+  font-weight: 750;
+}
+
+.login-field input {
+  width: 100%;
+
+  height: 52px;
+
+  padding:
+    0 16px;
+
+  border:
+    1px solid
+    rgba(75,57,82,0.15);
+
+  border-radius: 11px;
+
+  outline: none;
+
+  background:
+    rgba(255,250,243,0.58);
+
+  color:
+    #302933;
+
+  font-size: 13px;
+
+  transition:
+    .2s ease;
+}
+
+.login-field input:focus {
+  border-color:
+    rgba(112,66,140,0.5);
+
+  box-shadow:
+    0 0 0 4px
+    rgba(112,66,140,0.07);
+}
+
+.login-field input::placeholder {
+  color:
+    #9b929c;
+}
+
+
+/* =====================================================
+   LOGIN OPTIONS
+===================================================== */
+
+.login-options {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin:
+    2px 0 17px;
+
+  color:
+    #777078;
+
+  font-size: 10px;
+}
+
+.login-options label {
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+}
+
+.login-options input {
+  width: 13px;
+  height: 13px;
+
+  accent-color:
+    #70428c;
+}
+
+.login-options button {
+  border: 0;
+
+  padding: 0;
+
+  background: none;
+
+  color:
+    #70428c;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+
+/* =====================================================
+   BUTTON
+===================================================== */
+
+.enter-button {
+  width: 100%;
+
+  height: 54px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding:
+    0 19px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      100deg,
+      #694080,
+      #8759a0
+    );
+
+  color:
+    white;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 15px 35px
+    rgba(101,61,123,0.22);
+
+  transition:
+    transform .2s,
+    box-shadow .2s;
+}
+
+.enter-button strong {
+  font-size: 20px;
+
+  font-weight: 400;
+}
+
+.enter-button:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 19px 42px
+    rgba(101,61,123,0.3);
+}
+
+
+/* =====================================================
+   SIGNUP
+===================================================== */
+
+.login-signup {
+  margin-top:
+    13px;
+
+  text-align: center;
+
+  color:
+    #817783;
+
+  font-size: 10px;
+}
+
+.login-signup b {
+  margin-left: 4px;
+
+  color:
+    #70428c;
+
+  cursor: pointer;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .auction-reel {
+    min-width: 170vw;
+
+    grid-template-columns:
+      repeat(5, 1fr);
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+  .auction-reel {
+    inset: -15%;
+
+    min-width: 210vw;
+    min-height: 150vh;
+
+    grid-template-columns:
+      repeat(4, 1fr);
+
+    grid-auto-rows:
+      24vh;
+
+    gap: 8px;
+  }
+
+  .auction-image:nth-child(3n),
+  .auction-image:nth-child(5n) {
+    transform: none;
+  }
+
+  .auction-clock {
+    width: 180px;
+    height: 180px;
+  }
+
+  .brand {
+    top: 14px;
+    left: 14px;
+
+    padding:
+      8px 11px;
+  }
+
+  .brand-name {
+    font-size: 23px;
+  }
+
+  .brand-tagline {
+    font-size: 6px;
+  }
+
+  .login {
+    width: 100vw;
+    height: 100dvh;
+
+    min-height: 100dvh;
+  }
+
+  .login-content {
+    width:
+      calc(100vw - 32px);
+
+    min-height: 100dvh;
+
+    padding:
+      18px 0;
+
+    justify-content:
+      safe center;
+
+    overflow: visible;
+  }
+
+  .login-eyebrow {
+    margin-top:
+      30px;
+  }
+
+  .login-content h1 {
+    font-size:
+      52px;
+
+    line-height:
+      0.86;
+
+    margin-bottom:
+      12px;
+  }
+
+  .login-description {
+    font-size:
+      13px;
+
+    line-height:
+      1.5;
+
+    margin-bottom:
+      20px;
+  }
+
+  .login-field {
+    margin-bottom:
+      10px;
+  }
+
+  .login-field input {
+    height:
+      49px;
+  }
+
+  .login-options {
+    margin-bottom:
+      15px;
+  }
+
+  .enter-button {
+    height:
+      51px;
+  }
+
+  .login-signup {
+    margin-top:
+      13px;
+  }
+}
+
+
+/* =====================================================
+   SMALL PHONES
+===================================================== */
+
+@media (max-width: 380px) {
+
+  .login-content {
+    width:
+      calc(100vw - 26px);
+
+    padding:
+      12px 0;
+  }
+
+  .login-eyebrow {
+    margin-top:
+      20px;
+  }
+
+  .login-content h1 {
+    font-size:
+      45px;
+  }
+
+  .login-description {
+    font-size:
+      12px;
+
+    margin-bottom:
+      15px;
+  }
+
+  .login-field input {
+    height:
+      46px;
+  }
+
+  .enter-button {
+    height:
+      48px;
+  }
+
+}
+.reset-success {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin-top: 18px;
+
+  padding: 14px 16px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(112, 66, 140, 0.08);
+
+  border:
+    1px solid
+    rgba(112, 66, 140, 0.14);
+
+  color:
+    #5f4669;
+
+  animation:
+    resetSuccess 0.35s ease;
+}
+
+.reset-success > span {
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    #70428c;
+
+  color: white;
+
+  font-size: 12px;
+}
+
+.reset-success strong {
+  display: block;
+
+  font-size: 12px;
+}
+
+.reset-success p {
+  margin: 4px 0 0;
+
+  color:
+    #817783;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+/* =========================
+   RESET PASSWORD
+========================= */
+
+.password-error {
+  margin: -4px 0 12px;
+
+  color: #9b5269;
+
+  font-size: 10px;
+
+  font-weight: 600;
+}
+
+.enter-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+.back-login {
+  margin-top: 15px;
+
+  border: 0;
+
+  padding: 0;
+
+  background: transparent;
+
+  color: #70428c;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  align-self: center;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.back-login:hover {
+  opacity: 0.7;
+  transform: translateX(-2px);
+}
+
+@keyframes resetSuccess {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/*onbid signup - css*/
+
+.signup-page {
+  min-height: 100svh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(126, 87, 194, 0.12),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(126, 87, 194, 0.08),
+      transparent 30%
+    ),
+    #f8f7f5;
+  color: #17151a;
+}
+
+.signup-panel {
+  width: min(100%, 560px);
+  box-sizing: border-box;
+  padding: clamp(30px, 5vw, 58px);
+  border: 1px solid rgba(40, 30, 50, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 24px 80px rgba(42, 29, 52, 0.09);
+  backdrop-filter: blur(18px);
+}
+
+.signup-brand {
+  margin-bottom: 18px;
+  color: #6f35b5;
+  font-size: clamp(24px, 4vw, 30px);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.signup-live {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 30px;
+  color: #6f35b5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.signup-live span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #6f35b5;
+  box-shadow: 0 0 12px rgba(111, 53, 181, 0.35);
+}
+
+.signup-eyebrow {
+  margin-bottom: 10px;
+  color: #77717c;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.signup-panel h1 {
+  margin: 0;
+  font-size: clamp(46px, 8vw, 72px);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  font-weight: 500;
+}
+
+.signup-panel h1 em {
+  color: #6f35b5;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+}
+
+.signup-description {
+  max-width: 470px;
+  margin: 22px 0 30px;
+  color: #716b74;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.signup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signup-field label {
+  color: #37323a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.signup-field input {
+  width: 100%;
+  min-height: 50px;
+  box-sizing: border-box;
+  border: 1px solid rgba(48, 40, 54, 0.14);
+  border-radius: 2px;
+  outline: none;
+  padding: 0 15px;
+  background: rgba(250, 249, 251, 0.8);
+  color: #201d23;
+  font: inherit;
+  font-size: 14px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.signup-field input::placeholder {
+  color: #aaa3ad;
+}
+
+.signup-field input:focus {
+  border-color: #6f35b5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(111, 53, 181, 0.09);
+}
+
+.signup-field input[aria-invalid="true"] {
+  border-color: #b45d67;
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 72px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  border: 0;
+  padding: 6px;
+  background: transparent;
+  color: #6f35b5;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.password-toggle:hover {
+  text-decoration: underline;
+}
+
+.password-toggle:focus-visible,
+.signup-footer button:focus-visible,
+.signup-button:focus-visible {
+  outline: 3px solid rgba(111, 53, 181, 0.22);
+  outline-offset: 3px;
+}
+
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.strength-track {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+
+.strength-level {
+  height: 3px;
+  flex: 1;
+  background: #e6e1e8;
+  transition: background 160ms ease;
+}
+
+.strength-level.active {
+  background: #6f35b5;
+}
+
+.password-strength small {
+  min-width: 70px;
+  color: #817a84;
+  font-size: 10px;
+  text-align: right;
+}
+
+.field-error {
+  color: #a34d59;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.terms-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 2px;
+  color: #716b74;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.terms-option input {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  margin: 1px 0 0;
+  accent-color: #6f35b5;
+  cursor: pointer;
+}
+
+.terms-error {
+  margin-top: -12px;
+}
+
+.signup-form-error {
+  padding: 12px 14px;
+  border: 1px solid rgba(163, 77, 89, 0.2);
+  background: rgba(163, 77, 89, 0.05);
+  color: #963f4d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.signup-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 4px;
+  border: 0;
+  padding: 0 18px 0 20px;
+  background: #6f35b5;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.signup-button:hover:not(:disabled) {
+  background: #5f2d9c;
+  box-shadow: 0 12px 28px rgba(111, 53, 181, 0.18);
+  transform: translateY(-1px);
+}
+
+.signup-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.signup-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.signup-button span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.signup-button strong {
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.signup-success {
+  padding: 28px 0 8px;
+  text-align: center;
+}
+
+.signup-success-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(111, 53, 181, 0.1);
+  color: #6f35b5;
+  font-size: 24px;
+}
+
+.signup-success h2 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.signup-success p {
+  margin: 0;
+  color: #716b74;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.signup-footer {
+  margin-top: 28px;
+  color: #817a84;
+  font-size: 12px;
+  text-align: center;
+}
+
+.signup-footer button {
+  margin-left: 5px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #6f35b5;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .signup-page {
+    align-items: flex-start;
+    padding: 18px 12px;
+  }
+
+  .signup-panel {
+    padding: 28px 20px;
+  }
+
+  .signup-panel h1 {
+    font-size: clamp(44px, 14vw, 60px);
+  }
+
+  .signup-description {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 601px) {
+  .signup-page {
+    align-items: flex-start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .signup-panel {
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-field input,
+  .signup-button,
+  .strength-level {
+    transition: none;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE SAFETY
+===================================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+.login {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.login-content {
+  min-width: 0;
+}
+
+.signup-page {
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.signup-panel {
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  .login-content {
+    width: calc(100% - 32px);
+  }
+
+  .signup-page {
+    align-items: flex-start;
+    padding: 18px 12px;
+  }
+
+  .signup-panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-content {
+    width: calc(100% - 26px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.auction-lot-art {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      #ffffff 0%,
+      #e7e0d7 38%,
+      #cfc5b8 100%
+    );
+}
+
+.auction-lot-art::before {
+  content: "";
+  position: absolute;
+  inset: 12%;
+
+  border: 1px solid
+    rgba(88, 45, 128, 0.18);
+
+  transform:
+    rotate(calc(var(--lot) * 3deg));
+}
+
+.auction-lot-art::after {
+  content: "";
+  position: absolute;
+  width: 70%;
+  height: 70%;
+
+  border-radius: 50%;
+
+  border: 1px solid
+    rgba(88, 45, 128, 0.12);
+
+  transform:
+    rotate(calc(var(--lot) * -4deg));
+}
+
+.lot-number {
+  position: absolute;
+
+  top: 12%;
+  left: 12%;
+
+  font-size: 9px;
+  letter-spacing: 0.18em;
+
+  color: rgba(25, 20, 30, 0.5);
+}
+
+.lot-symbol {
+  position: relative;
+  z-index: 2;
+
+  font-size: clamp(38px, 5vw, 72px);
+
+  font-weight: 300;
+
+  color: rgba(75, 36, 110, 0.72);
+
+  transform:
+    rotate(calc(var(--lot) * 7deg));
+}
+
+.lot-line {
+  position: absolute;
+
+  width: 55%;
+  height: 1px;
+
+  background:
+    rgba(75, 36, 110, 0.2);
+
+  transform:
+    rotate(calc(var(--lot) * 2deg));
+}
+
+.lot-label {
+  position: absolute;
+
+  right: 12%;
+  bottom: 12%;
+
+  font-size: 8px;
+  letter-spacing: 0.25em;
+
+  color: rgba(25, 20, 30, 0.45);
+}/* =========================================
+   PHOTO-FREE AUCTION REEL
+   ========================================= */
+
+.auction-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8f4ee 0%,
+      #e7ded2 45%,
+      #c9bdaf 100%
+    );
+}
+
+.auction-lot-art {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(255, 255, 255, 0.95),
+      rgba(232, 224, 213, 0.85) 42%,
+      rgba(199, 188, 174, 0.95) 100%
+    );
+}
+
+.auction-lot-art::before {
+  content: "";
+
+  position: absolute;
+  inset: 10%;
+
+  border: 1px solid
+    rgba(76, 38, 105, 0.2);
+
+  transform:
+    rotate(calc(var(--lot) * 2deg));
+
+  box-shadow:
+    inset 0 0 50px
+      rgba(76, 38, 105, 0.04);
+}
+
+.auction-lot-art::after {
+  content: "";
+
+  position: absolute;
+
+  width: 65%;
+  height: 65%;
+
+  border-radius: 50%;
+
+  border: 1px solid
+    rgba(76, 38, 105, 0.14);
+
+  transform:
+    rotate(calc(var(--lot) * -3deg));
+}
+
+.lot-number {
+  position: absolute;
+
+  top: 10%;
+  left: 10%;
+
+  z-index: 2;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  letter-spacing: 0.18em;
+
+  color:
+    rgba(28, 22, 34, 0.48);
+}
+
+.lot-symbol {
+  position: relative;
+
+  z-index: 3;
+
+  display: block;
+
+  font-size:
+    clamp(40px, 5vw, 74px);
+
+  line-height: 1;
+
+  font-weight: 300;
+
+  color:
+    rgba(76, 38, 105, 0.7);
+
+  transform:
+    rotate(calc(var(--lot) * 7deg));
+}
+
+.lot-line {
+  position: absolute;
+
+  z-index: 2;
+
+  width: 55%;
+  height: 1px;
+
+  background:
+    rgba(76, 38, 105, 0.2);
+
+  transform:
+    rotate(calc(var(--lot) * 2deg));
+}
+
+.lot-label {
+  position: absolute;
+
+  right: 10%;
+  bottom: 10%;
+
+  z-index: 2;
+
+  font-size: 8px;
+  font-weight: 600;
+
+  letter-spacing: 0.25em;
+
+  color:
+    rgba(28, 22, 34, 0.42);
+}
+
+/* =========================================
+   ONBID LOCAL INTRO IMAGES
+   ========================================= */
+
+.auction-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.auction-image img {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  user-select: none;
+  pointer-events: none;
+}

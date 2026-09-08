@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.vercel
+.env*
+
+# Local backup/archive files
+apps/web/OnBid-Frontend.zip
+apps/web/src/index.css.bak
+appsweb/
