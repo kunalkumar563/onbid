@@ -67,6 +67,17 @@ export class RazorpayService {
   /** amountRupees is whole rupees (₹49) — Razorpay's Orders API wants paise. */
   async createOrder(amountRupees: number, receipt: string): Promise<RazorpayOrderResult> {
     const amountPaise = Math.round(amountRupees * 100);
+    
+    // DEMO MODE BYPASS: If using the dummy key, don't actually hit the Razorpay API!
+    if (this.keyId === 'rzp_test_dummy' || !this.keyId) {
+      return {
+        orderId: `order_dummy_${Date.now()}`,
+        amount: amountPaise,
+        currency: RAZORPAY_CURRENCY,
+        keyId: 'rzp_test_dummy',
+      };
+    }
+
     const order = await this.client.orders.create({
       amount: amountPaise,
       currency: RAZORPAY_CURRENCY,
