@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/auth";
 import { ApiError } from "../../services/api/client";
 import type { RegisterCredentials } from "../../types/auth";
@@ -72,6 +73,7 @@ function Signup({ onBack }: SignupProps) {
   const [errors, setErrors] =
     useState<SignupErrors>({});
 
+  const { refreshUser } = useAuth();
   const [status, setStatus] =
     useState<SignupStatus>("idle");
 
@@ -250,8 +252,8 @@ function Signup({ onBack }: SignupProps) {
 
     try {
       await authService.register(payload);
-
-      setStatus("success");
+      await refreshUser();
+      window.location.assign("/dashboard");
     } catch (error) {
       if (error instanceof ApiError) {
         setServerError(error.message);
