@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import {
   BadRequestException,
   ConflictException,
@@ -35,7 +36,7 @@ export class VerificationService {
     const existing = await this.prisma.verifier.findUnique({ where: { userId: dto.userId } });
     if (existing) throw new BadRequestException('This user is already a verifier');
 
-    const roles = user.roles.includes('VERIFIER') ? user.roles : [...user.roles, 'VERIFIER'];
+    const roles = user.roles.includes(Role.VERIFIER) ? user.roles : [...user.roles, Role.VERIFIER];
 
     const [, verifier] = await this.prisma.$transaction([
       this.prisma.user.update({ where: { id: dto.userId }, data: { roles } }),

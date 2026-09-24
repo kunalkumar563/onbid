@@ -8,6 +8,6 @@ import { RazorpayService } from './razorpay.service';
   providers: [PaymentsService, RazorpayService],
   // Exported so listings/verification (verification fee) and bidding/auctions
   // (entry fee) can create orders without owning Razorpay plumbing themselves.
-  exports: [PaymentsService],
+  exports: [PaymentsService, RazorpayService],
 })
 export class PaymentsModule {}

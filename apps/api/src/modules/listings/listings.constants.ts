@@ -1,4 +1,4 @@
-export { CATEGORY_MIN_PRICE } from './category-taxonomy';
+export { CATEGORY_MIN_PRICE, VALID_SUBCATEGORIES, VALID_SUBSUBCATEGORIES } from './category-taxonomy';
 
 export const MIN_PHOTOS = 1;
 export const MAX_PHOTOS = 10;
