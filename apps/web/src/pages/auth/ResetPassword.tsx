@@ -95,7 +95,7 @@ function ResetPassword({
       await authService.resetPassword(payload);
       
       await refreshUser();
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true });
     } catch (requestError) {
       if (
         requestError instanceof ApiError

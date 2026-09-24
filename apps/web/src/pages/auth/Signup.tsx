@@ -255,7 +255,7 @@ function Signup({ onBack }: SignupProps) {
     try {
       await authService.register(payload);
       await refreshUser();
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         setServerError(error.message);

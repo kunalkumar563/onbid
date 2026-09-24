@@ -129,7 +129,7 @@ function LoginRoute() {
       onForgot={() => navigate("/forgot-password")}
       onSignup={() => navigate("/signup")}
       onSuccess={() =>
-        navigate("/dashboard", {
+        navigate("/", {
           replace: true,
         })
       }
