@@ -2846,3 +2846,21 @@
     cursor: pointer;
   }
 }
+
+.header-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--onbid-purple-dark);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.header-avatar:hover {
+  background-color: #3b2a45;
+}

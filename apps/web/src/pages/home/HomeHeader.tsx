@@ -107,6 +107,7 @@ const CURRENCIES = [
 
 export default function HomeHeader() {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   const [mobileOpen, setMobileOpen] =
     useState<boolean>(false);
@@ -294,25 +295,38 @@ export default function HomeHeader() {
             <HeartIcon />
           </Link>
 
-          {/* SIGN IN */}
+          {/* AUTH ACTIONS */}
+          
+          {isAuthenticated && user ? (
+            <Link
+              to="/dashboard"
+              className="header-avatar"
+              title={user.fullName}
+              onClick={closeMobileMenu}
+            >
+              {user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+            </Link>
+          ) : (
+            <>
+              {/* SIGN IN */}
+              <Link
+                to="/login"
+                className="signin-link"
+                onClick={closeMobileMenu}
+              >
+                Sign In
+              </Link>
 
-          <Link
-            to="/login"
-            className="signin-link"
-            onClick={closeMobileMenu}
-          >
-            Sign In
-          </Link>
-
-          {/* GET STARTED */}
-
-          <Link
-            to="/signup"
-            className="header-get-started"
-            onClick={closeMobileMenu}
-          >
-            Get Started
-          </Link>
+              {/* GET STARTED */}
+              <Link
+                to="/signup"
+                className="header-get-started"
+                onClick={closeMobileMenu}
+              >
+                Get Started
+              </Link>
+            </>
+          )}
 
           {/* MOBILE MENU */}
 
@@ -470,24 +484,33 @@ export default function HomeHeader() {
           Become a Seller
         </Link>
 
-        {/* SIGN IN */}
+        {/* AUTH ACTIONS */}
 
-        <Link
-          to="/login"
-          onClick={closeMobileMenu}
-        >
-          Sign In
-        </Link>
+        {isAuthenticated && user ? (
+          <Link
+            to="/dashboard"
+            onClick={closeMobileMenu}
+          >
+            Go to Dashboard ({user.fullName.split(' ')[0]})
+          </Link>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              onClick={closeMobileMenu}
+            >
+              Sign In
+            </Link>
 
-        {/* GET STARTED */}
-
-        <Link
-          to="/signup"
-          className="mobile-start"
-          onClick={closeMobileMenu}
-        >
-          Get Started
-        </Link>
+            <Link
+              to="/signup"
+              className="mobile-start"
+              onClick={closeMobileMenu}
+            >
+              Get Started
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );
