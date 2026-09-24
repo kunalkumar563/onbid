@@ -9,7 +9,7 @@ import react from "@vitejs/plugin-react";
 // for local development (see auth.controller.ts's cookie comment for how
 // this differs from the actual Vercel + Railway/Render production setup).
 // eslint-disable-next-line no-undef -- vite.config.js runs in Node, `process` is real here
-const BACKEND_URL = process.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL = process.env.VITE_BACKEND_URL || "http://127.0.0.1:3000";
 
 export default defineConfig({
   plugins: [react()],
