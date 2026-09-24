@@ -1,4 +1,6 @@
-import { useState, useRef } from 'react';
+import re
+
+content = """import { useState, useRef } from 'react';
 import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import './BidderDashboard.css';
 
@@ -200,3 +202,8 @@ export default function KYC() {
     </DashboardLayout>
   );
 }
+"""
+
+with open('apps/web/src/pages/dashboard/bidder/KYC.tsx', 'w') as f:
+    f.write(content)
+
