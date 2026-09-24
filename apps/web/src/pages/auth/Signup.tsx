@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/auth";
 import { ApiError } from "../../services/api/client";
@@ -74,6 +75,7 @@ function Signup({ onBack }: SignupProps) {
     useState<SignupErrors>({});
 
   const { refreshUser } = useAuth();
+  const navigate = useNavigate();
   const [status, setStatus] =
     useState<SignupStatus>("idle");
 
@@ -253,7 +255,7 @@ function Signup({ onBack }: SignupProps) {
     try {
       await authService.register(payload);
       await refreshUser();
-      window.location.assign("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         setServerError(error.message);

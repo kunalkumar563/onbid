@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { ApiError } from "../../services/api/client";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../services/auth";
 import type { ResetPasswordRequest } from "../../types/auth";
@@ -18,6 +19,7 @@ function ResetPassword({
   onBack,
 }: ResetPasswordProps) {
   const { refreshUser } = useAuth();
+  const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] =
     useState("");
@@ -93,7 +95,7 @@ function ResetPassword({
       await authService.resetPassword(payload);
       
       await refreshUser();
-      window.location.assign("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (requestError) {
       if (
         requestError instanceof ApiError

@@ -8,11 +8,13 @@ import { useAuth } from "../../context/AuthContext";
 type LoginPageProps = {
   onForgot: () => void;
   onSignup: () => void;
+  onSuccess: () => void;
 };
 
 function LoginPage({
   onForgot,
   onSignup,
+  onSuccess,
 }: LoginPageProps) {
   const { refreshUser } = useAuth();
 
@@ -52,12 +54,7 @@ function LoginPage({
 
       await refreshUser();
 
-      /*
-       * LoginRoute owns navigation.
-       * The authenticated user is now available
-       * to DashboardRedirect.
-       */
-      window.location.assign("/dashboard");
+      onSuccess();
     } catch (requestError) {
       if (requestError instanceof ApiError) {
         setError(requestError.message);
