@@ -3,21 +3,19 @@ import re
 with open('apps/web/src/pages/auth/ForgotPassword.tsx', 'r') as f:
     content = f.read()
 
-old_submit = '''      await authService.forgotPassword(payload);
+old_btn = '''            <button
+              className="enter-button"
+              type="button"
+              onClick={onReset}
+            >
+              <span>
+                Continue to Reset Password
+              </span>
 
-      setStatus("success");
-    } catch (requestError) {'''
+              <strong>→</strong>
+            </button>'''
 
-new_submit = '''      const response = await authService.forgotPassword(payload);
-
-      if (response && response.token) {
-        window.location.assign(`/reset-password?token=${response.token}`);
-      } else {
-        setStatus("success");
-      }
-    } catch (requestError) {'''
-
-content = content.replace(old_submit, new_submit)
+content = content.replace(old_btn, '')
 
 with open('apps/web/src/pages/auth/ForgotPassword.tsx', 'w') as f:
     f.write(content)

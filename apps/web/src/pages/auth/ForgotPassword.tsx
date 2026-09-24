@@ -52,13 +52,8 @@ function ForgotPassword({
     };
 
     try {
-      const response = await authService.forgotPassword(payload);
-
-      if (response && response.token) {
-        window.location.assign(`/reset-password?token=${response.token}`);
-      } else {
-        setStatus("success");
-      }
+      await authService.forgotPassword(payload);
+      setStatus("success");
     } catch (requestError) {
       if (requestError instanceof ApiError) {
         setError(requestError.message);
@@ -194,17 +189,7 @@ function ForgotPassword({
               </div>
             </div>
 
-            <button
-              className="enter-button"
-              type="button"
-              onClick={onReset}
-            >
-              <span>
-                Continue to Reset Password
-              </span>
 
-              <strong>→</strong>
-            </button>
 
             <button
               className="back-login"

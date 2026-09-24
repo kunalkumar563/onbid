@@ -27,7 +27,7 @@ export class EmailService {
 
   async send(to: string, subject: string, body: string): Promise<void> {
     if (!this.configured) {
-      this.logger.debug(`(SendGrid not configured) would have emailed ${to}: ${subject}`);
+      this.logger.debug(`(SendGrid not configured) would have emailed ${to}: ${subject}\n${body}`);
       return;
     }
     await sgMail.send({
