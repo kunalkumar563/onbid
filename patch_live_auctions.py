@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react';
+import re
+
+with open('apps/web/src/pages/dashboard/bidder/LiveAuctions.tsx', 'r') as f:
+    content = f.read()
+
+new_content = """import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import { api } from '../../../services/api/client';
@@ -13,7 +18,7 @@ export default function LiveAuctions() {
       try {
         // The backend endpoint for active auctions is GET /listings
         const data = await api.get('/listings');
-        setAuctions(Array.isArray(data) ? data : data?.items || data?.data || []);
+        setAuctions(Array.isArray(data) ? data : data?.data || []);
       } catch (err) {
         console.error('Failed to fetch auctions:', err);
       } finally {
@@ -76,3 +81,8 @@ export default function LiveAuctions() {
     </DashboardLayout>
   );
 }
+"""
+
+with open('apps/web/src/pages/dashboard/bidder/LiveAuctions.tsx', 'w') as f:
+    f.write(new_content)
+
