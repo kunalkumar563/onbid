@@ -12,9 +12,10 @@ export const authService = {
   login(
     credentials: LoginCredentials,
   ): Promise<AuthResponse> {
-    return api.post<AuthResponse, LoginCredentials>(
+    const { rememberMe, ...rest } = credentials;
+    return api.post<AuthResponse, any>(
       "/auth/login",
-      credentials,
+      rest,
     );
   },
 
