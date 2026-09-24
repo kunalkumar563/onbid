@@ -227,8 +227,8 @@ function AuctionList() {
         setError(null);
 
         const response =
-          await api.get<Auction[]>(
-            "/auctions",
+          await api.get<any>(
+            "/listings",
           );
 
         if (!mounted) {
