@@ -86,10 +86,10 @@ export default () => ({
       // \n-escaping approach as the JWT keys — see scripts/generate-jwt-keys.ts).
       serviceAccountJson: process.env.FCM_SERVICE_ACCOUNT_JSON,
     },
-    sendgrid: {
-      apiKey: process.env.SENDGRID_API_KEY,
-      fromEmail: process.env.SENDGRID_FROM_EMAIL || 'noreply@onbid.example',
-      fromName: process.env.SENDGRID_FROM_NAME || 'Onbid',
+    resend: {
+      apiKey: process.env.RESEND_API_KEY,
+      fromEmail: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      fromName: process.env.RESEND_FROM_NAME || 'Onbid',
     },
     // Auction-ending-soon reminder fires this many minutes before endTime.
     auctionEndingSoonMinutes: parseInt(process.env.AUCTION_ENDING_SOON_MINUTES || '15', 10),
