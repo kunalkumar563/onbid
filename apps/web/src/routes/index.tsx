@@ -25,7 +25,6 @@ import BidderWatchlist from "../pages/dashboard/bidder/Watchlist";
 import BidderOrders from "../pages/dashboard/bidder/Orders";
 import BidderTransactions from "../pages/dashboard/bidder/Transactions";
 import BidderKYC from "../pages/dashboard/bidder/KYC";
-import BidderMessages from "../pages/dashboard/bidder/Messages";
 import BidderPayouts from "../pages/dashboard/bidder/Payouts";
 import BidderAccount from "../pages/dashboard/bidder/MyAccount";
 import BidderSettings from "../pages/dashboard/bidder/Settings";
@@ -322,7 +321,6 @@ export const router = createBrowserRouter([
               { path: "orders", element: <BidderOrders /> },
               { path: "transactions", element: <BidderTransactions /> },
               { path: "kyc", element: <BidderKYC /> },
-              { path: "messages", element: <BidderMessages /> },
               { path: "payouts", element: <BidderPayouts /> },
               { path: "account", element: <BidderAccount /> },
               { path: "settings", element: <BidderSettings /> }

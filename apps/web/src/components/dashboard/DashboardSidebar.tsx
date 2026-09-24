@@ -26,7 +26,6 @@ const ROLE_NAVIGATION: Record<
     { label: "Orders", path: "/dashboard/bidder/orders" },
     { label: "Transactions", path: "/dashboard/bidder/transactions" },
     { label: "KYC Verification", path: "/dashboard/bidder/kyc" },
-    { label: "Messages", path: "/dashboard/bidder/messages" },
     { label: "Payouts & Wallet", path: "/dashboard/bidder/payouts" },
     { label: "My Account", path: "/dashboard/bidder/account" },
     { label: "Settings", path: "/dashboard/bidder/settings" }
