@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: onbid
+          POSTGRES_PASSWORD: onbid
+          POSTGRES_DB: onbid
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U onbid"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://onbid:onbid@localhost:5432/onbid?schema=public
+      REDIS_URL: redis://localhost:6379
+      # Test-only JWT keypair — not a real secret, fine to keep in the workflow.
+      JWT_ACCESS_PRIVATE_KEY: ${{ secrets.CI_JWT_ACCESS_PRIVATE_KEY }}
+      JWT_ACCESS_PUBLIC_KEY: ${{ secrets.CI_JWT_ACCESS_PUBLIC_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
+      - run: npm run lint
+
+      - run: npx prisma migrate deploy
+
+      - run: npm run test
+
+      - run: npm run test:e2e
+
+      - run: npm run build

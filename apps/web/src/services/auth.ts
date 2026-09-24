@@ -52,7 +52,7 @@ export const authService = {
     );
   },
 
-  getCurrentUser(): Promise<AuthResponse> {
-    return api.get<AuthResponse>("/auth/me");
+  getCurrentUser(): Promise<import("../types/auth").AuthUser> {
+    return api.get<import("../types/auth").AuthUser>("/auth/me");
   },
 };

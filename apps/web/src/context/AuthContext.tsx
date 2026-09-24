@@ -50,14 +50,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [status, setStatus] = useState<AuthStatus>("loading");
 
   const refreshUser = async () => {
-    const savedRole = (localStorage.getItem("onbid_demo_role") as UserRole) || "bidder";
-    setUser({
-      id: "dummy-user-123",
-      fullName: "Test User",
-      email: "test@example.com",
-      role: savedRole,
-    });
-    setStatus("authenticated");
+    try {
+      // API call to the actual backend
+      const user = await authService.getCurrentUser();
+      setUser(user);
+      setStatus("authenticated");
+    } catch (error) {
+      // Fallback for Vercel preview/demo mode if backend is not available
+      if (import.meta.env.VITE_PREVIEW_MODE === "true") {
+        console.warn("Backend unavailable, using Demo Mode fallback.");
+        const savedRole = (localStorage.getItem("onbid_demo_role") as UserRole) || "bidder";
+        setUser({
+          id: "dummy-user-123",
+          fullName: "Demo User",
+          email: "demo@example.com",
+          role: savedRole,
+        });
+        setStatus("authenticated");
+      } else {
+        clearSession();
+      }
+    }
   };
 
   const switchRole = (newRole: UserRole) => {
@@ -72,7 +85,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = async () => {
-    clearSession();
+    try {
+      await authService.logout();
+    } catch (e) {
+      // ignore logout errors
+    } finally {
+      clearSession();
+    }
   };
 
   useEffect(() => {

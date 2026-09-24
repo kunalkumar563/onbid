@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+coverage/
+
+# env / secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# local key material (see scripts/generate-jwt-keys.ts)
+keys/
+*.pem
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# prisma
+prisma/dev.db
+
+# testing
+/coverage
+
+# misc
+*.tsbuildinfo

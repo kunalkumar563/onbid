@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: onbid-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_ACCESS_PRIVATE_KEY
+        sync: false
+      - key: JWT_ACCESS_PUBLIC_KEY
+        sync: false
+      - key: KYC_PROVIDER
+        value: signzy
+      - key: SIGNZY_USERNAME
+        sync: false
+      - key: SIGNZY_API_KEY
+        sync: false
+      - key: SIGNZY_WEBHOOK_SECRET
+        sync: false

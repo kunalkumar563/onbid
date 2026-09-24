@@ -1,0 +1,550 @@
+// Onbid — Prisma schema
+// Phase 0: no models (empty schema, just proving the migration pipeline works).
+// Phase 1 adds: User, KycVerification.
+// Later phases extend this file — see PRD §5 for the tables that arrive with
+// Listings/Auctions (Phase 2), Bidding (Phase 3), Escrow (Phase 4), etc.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 1 — Users, Auth, KYC
+// ---------------------------------------------------------------------------
+
+enum Role {
+  BUYER
+  SELLER
+  VERIFIER
+  ADMIN
+}
+
+// A user can hold multiple roles at once. Every registered user is BUYER+SELLER
+// by default (the PRD treats these as things any account can do, not exclusive
+// states) — VERIFIER and ADMIN are additional roles granted internally on top
+// of that, per tech stack §4: "same users table, additional role flag."
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String? // nullable: a GOOGLE-only account has no local password
+  authProvider AuthProvider @default(LOCAL)
+  googleId     String?      @unique
+
+  fullName    String
+  dateOfBirth DateTime // minimum age 18 is enforced at registration against this
+  phone       String? // collected at signup; not required by the original PRD spec but the frontend form collects it
+
+  roles Role[] @default([BUYER, SELLER])
+
+  // Forgot/reset password — added to match a frontend flow that has no
+  // backend counterpart otherwise. Only a hash is stored, never the raw
+  // token (same reasoning as password hashing itself) — matching the raw
+  // token against this hash is what proves the reset link wasn't forged.
+  passwordResetTokenHash String?
+  passwordResetExpiresAt DateTime?
+
+  // KYC — tech stack §4: never store raw PAN/Aadhaar documents ourselves,
+  // only the provider's verification status + their reference id.
+  kycStatus     KycStatus @default(PENDING)
+  kycVerifiedAt DateTime?
+
+  kycVerifications KycVerification[]
+
+  // Phase 2+
+  verifierProfile        Verifier?             @relation("UserVerifierProfile")
+  auctionsAsSeller       Auction[]             @relation("SellerAuctions")
+  auctionsAsCurrentBidder Auction[]            @relation("CurrentBidderAuctions")
+  bids                   Bid[]
+  entryPayments          AuctionEntryPayment[]
+  verificationFeePayments VerificationFeePayment[]
+
+  // Phase 4 — Route linked account for seller payouts. Only the Razorpay
+  // reference is stored, never raw bank details — same principle as KYC
+  // (tech stack §4: store the provider's reference, not the underlying
+  // sensitive document/data itself).
+  razorpayLinkedAccountId String? @unique
+  transactionsAsBuyer     Transaction[] @relation("BuyerTransactions")
+  transactionsAsSeller    Transaction[] @relation("SellerTransactions")
+
+  // Phase 6
+  disputesRaised   Dispute[] @relation("DisputesRaisedBy")
+  disputesResolved Dispute[] @relation("DisputesResolvedBy")
+
+  // Phase 7 — web push tokens. Array, not a single field: a user can have
+  // more than one browser/device registered (tech stack §1: "web push now
+  // / app later" — this doesn't close the door on multiple registrations).
+  fcmTokens String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// One row per KYC attempt against the provider (Signzy or IDfy). Verification
+// is async — we create this row when we call the provider, then update it when
+// their webhook calls us back, then roll the outcome up onto User.kycStatus.
+model KycVerification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  provider      String // 'signzy' | 'idfy'
+  providerRefId String // the vendor's tracking id for this specific attempt
+  documentType  String // 'pan' | 'aadhaar'
+
+  status           KycStatus @default(PENDING)
+  rawStatusPayload Json? // last status/verdict payload from the provider — status fields only, never the document image/number itself
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerRefId])
+  @@index([userId])
+  @@map("kyc_verifications")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Listings & Verification
+// ---------------------------------------------------------------------------
+
+// Expanded from the PRD's original 5 categories to match the frontend's
+// actual taxonomy, per explicit direction: "all the categories that
+// frontend have, create them on the backend as well." subCategory/
+// subSubCategory are plain strings (not enums — see
+// listings/category-taxonomy.ts), validated against a backend copy of the
+// same tree the frontend's config/categories.ts defines, since a ~200-leaf
+// sub-subcategory list is unworkable as a Prisma enum and would need a
+// migration for every future addition.
+enum AuctionCategory {
+  ELECTRONICS
+  ART_COLLECTIBLES
+  FASHION
+  JEWELRY_WATCHES
+  HOME_GARDEN
+  SPORTS
+  STATIONERY_OFFICE
+}
+
+// PRD §4.2: Draft → Pending Verification → Verified / Rejected → Active → Ended → Sold / Cancelled
+enum AuctionStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  VERIFIED
+  REJECTED
+  ACTIVE
+  ENDED
+  SOLD
+  CANCELLED
+}
+
+// PRD §5's own ALTER TABLE — kept as a separate field alongside AuctionStatus
+// even though they overlap, because that's how the PRD's documented schema
+// models it (a fast filter column distinct from the overall lifecycle state).
+enum AuctionVerificationStatus {
+  PENDING
+  PASSED
+  FAILED
+}
+
+enum VerificationRequestStatus {
+  PENDING
+  SCHEDULED
+  PASSED
+  FAILED
+}
+
+enum PaymentStatus {
+  CREATED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// A "listing" and an "auction" are the same row throughout its lifecycle —
+// the PRD's own data model confirms this: verification_requests.listing_id
+// references auctions(id), there's no separate listings table. AuctionStatus
+// tracks which stage of that lifecycle a row is in.
+model Auction {
+  id       String @id @default(uuid())
+  sellerId String
+  seller   User   @relation("SellerAuctions", fields: [sellerId], references: [id])
+
+  title       String
+  description String
+  category    AuctionCategory
+  // Plain strings, validated at the DTO layer against category-taxonomy.ts
+  // rather than as Prisma enums — see the AuctionCategory comment above.
+  subCategory    String?
+  subSubCategory String?
+  photos      String[] // R2 object keys, 1–10 per PRD §4.2
+
+  // Money fields use Decimal, never Float/Int-as-paise-guess — tech stack
+  // doc is explicit about this ("you don't want a silently-coerced string
+  // where a DECIMAL should be").
+  startingPrice Decimal @db.Decimal(10, 2)
+  durationHours Int
+
+  // Simple string, matched against Verifier.coverageArea — PRD asks for
+  // "location for verifier routing," not geolocation/lat-lng, and verifiers
+  // themselves only carry a coverageArea string, so a comparable string is
+  // the right granularity here rather than inventing a geo model.
+  sellerLocation String
+
+  status AuctionStatus @default(DRAFT)
+
+  // Seller's requested start time. Nullable: PRD §4.2's required-fields list
+  // doesn't mention it, but §4.3 says a passed verification "publishes
+  // according to the seller's chosen start time" — so if unset, "publish
+  // immediately on verification pass" is the default.
+  requestedStartTime DateTime?
+
+  // Bidding fields (Phase 3) — same row, so they live here rather than a
+  // separate table, matching the tech stack's "auctions module owns bid
+  // increments/anti-snipe" framing.
+  startTime       DateTime?
+  endTime         DateTime?
+  extensionsUsed  Int      @default(0) // anti-snipe: max 3, enforced in application logic
+  currentBid      Decimal? @db.Decimal(10, 2)
+  currentBidderId String?
+  currentBidder   User?    @relation("CurrentBidderAuctions", fields: [currentBidderId], references: [id])
+
+  // PRD §5's bidirectional FK: this points at whichever VerificationRequest
+  // is the *current* one (there can be several over time if a seller
+  // resubmits after a fail — see VerificationRequest.listingId below for the
+  // other direction of this relationship).
+  currentVerificationRequestId String?                    @unique
+  currentVerificationRequest   VerificationRequest?       @relation("CurrentVerificationRequest", fields: [currentVerificationRequestId], references: [id])
+  verificationStatus           AuctionVerificationStatus  @default(PENDING)
+
+  verificationRequests   VerificationRequest[]   @relation("ListingVerificationRequests")
+  verificationFeePayments VerificationFeePayment[]
+  entryPayments          AuctionEntryPayment[]
+  bids                   Bid[]
+
+  // Phase 4 — same bidirectional pattern as verification: an auction can
+  // accumulate more than one Transaction attempt (the non-payment cascade to
+  // the next-highest bidder creates a new one each time), and
+  // currentTransactionId points at whichever is the live/current attempt.
+  currentTransactionId String?      @unique
+  currentTransaction   Transaction? @relation("AuctionCurrentTransaction", fields: [currentTransactionId], references: [id])
+  transactions         Transaction[] @relation("AuctionTransactions")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([category, status])
+  @@map("auctions")
+}
+
+model Verifier {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation("UserVerifierProfile", fields: [userId], references: [id])
+
+  coverageArea       String
+  active             Boolean  @default(true)
+  avgTurnaroundHours Decimal? @db.Decimal(5, 2)
+
+  verificationRequests VerificationRequest[]
+
+  createdAt DateTime @default(now())
+
+  @@map("verifiers")
+}
+
+model VerificationRequest {
+  id String @id @default(uuid())
+
+  // Column named listingId (not auctionId) to match the PRD's own SQL
+  // literally — same table, PRD just calls it "listing" from this side.
+  listingId String
+  listing   Auction @relation("ListingVerificationRequests", fields: [listingId], references: [id])
+
+  verifierId String?
+  verifier   Verifier? @relation(fields: [verifierId], references: [id])
+
+  status    VerificationRequestStatus @default(PENDING)
+  checklist Json? // category-specific structured checklist, see verification.constants.ts
+  photos    String[] // 5–10 R2 object keys per PRD §4.3
+  notes     String?
+
+  scheduledAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  feePayment      VerificationFeePayment?
+  currentForAuction Auction?               @relation("CurrentVerificationRequest")
+
+  @@index([status])
+  @@index([verifierId])
+  @@map("verification_requests")
+}
+
+// PRD/tech-stack: verification fee (₹49) is paid *before* the request exists
+// — payment confirms, then the VerificationRequest row is created and linked
+// back here. So verificationRequestId starts null.
+model VerificationFeePayment {
+  id       String  @id @default(uuid())
+  listingId String
+  listing   Auction @relation(fields: [listingId], references: [id])
+  sellerId String
+  seller   User    @relation(fields: [sellerId], references: [id])
+
+  amount Decimal @db.Decimal(10, 2)
+
+  razorpayOrderId   String  @unique
+  razorpayPaymentId String?
+  status            PaymentStatus @default(CREATED)
+
+  verificationRequestId String?              @unique
+  verificationRequest   VerificationRequest? @relation(fields: [verificationRequestId], references: [id])
+
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+
+  @@map("verification_fee_payments")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3 — Bidding
+// ---------------------------------------------------------------------------
+
+model Bid {
+  id        String   @id @default(uuid())
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+  bidderId  String
+  bidder    User     @relation(fields: [bidderId], references: [id])
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  @@index([auctionId, createdAt])
+  @@map("bids")
+}
+
+// One entry-fee payment per (user, auction) — tech stack §3: "check
+// entry_fee_paid for (user, auction) pair" before accepting a bid.
+model AuctionEntryPayment {
+  id        String  @id @default(uuid())
+  auctionId String
+  auction   Auction @relation(fields: [auctionId], references: [id])
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+
+  amount Decimal @db.Decimal(10, 2)
+
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  status            PaymentStatus @default(CREATED)
+
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+
+  // Set only in the specific case the README documents: the winning-bidder
+  // cascade exhausts every bidder with none paying, which is treated as
+  // equivalent to the PRD's "auction cancelled after going live" refund
+  // clause. An individual bidder losing their own turn in the cascade does
+  // NOT get refunded — only a fully-exhausted auction triggers this.
+  razorpayRefundId String?
+  refundedAt       DateTime?
+
+  @@unique([auctionId, userId])
+  @@map("auction_entry_payments")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 — Payments & Escrow
+// ---------------------------------------------------------------------------
+
+// PRD §3/§4.5 lifecycle: a winning bidder has 48h to pay (AWAITING_PAYMENT).
+// If they don't, the item cascades to the next-highest bidder — the OLD
+// Transaction is marked CANCELLED and a NEW one is created for the next
+// bidder (kept as separate rows, not overwritten in place, so the full
+// history of who was offered the item and when is preserved for audit/
+// dispute purposes). PAID means the buyer's money is captured and held.
+// DELIVERED means the buyer confirmed receipt (Phase 5) — starts the
+// auto-release countdown. RELEASED/REFUNDED are terminal.
+enum TransactionStatus {
+  AWAITING_PAYMENT
+  PAID
+  DELIVERED
+  RELEASED
+  REFUNDED
+  CANCELLED
+}
+
+// PRD §5's literal enum, kept as its own field distinct from
+// TransactionStatus for the same reason AuctionVerificationStatus is kept
+// separate from AuctionStatus — a fast, denormalized filter column matching
+// exactly what the PRD's own ALTER TABLE specifies.
+enum PayoutStatus {
+  HELD
+  RELEASED
+  WITHHELD
+}
+
+enum EscrowEventType {
+  HELD
+  DELIVERED
+  RELEASED
+  DISPUTED
+  REFUNDED
+  WITHHELD
+  CANCELLED
+}
+
+model Transaction {
+  id        String  @id @default(uuid())
+  auctionId String
+  auction   Auction @relation("AuctionTransactions", fields: [auctionId], references: [id])
+  buyerId   String
+  buyer     User    @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  sellerId  String
+  seller    User    @relation("SellerTransactions", fields: [sellerId], references: [id])
+
+  amount          Decimal           @db.Decimal(10, 2) // the winning bid amount owed by the buyer
+  status          TransactionStatus @default(AWAITING_PAYMENT)
+  paymentDeadline DateTime // 48h from creation, or from the cascade to the next bidder
+
+  razorpayOrderId   String? @unique
+  razorpayPaymentId String?
+
+  // Read from Razorpay's actual reported fee/tax on the captured payment —
+  // never an assumed percentage. See RazorpayService.fetchPaymentFees and
+  // the README for why (Razorpay's own Route docs say to do exactly this).
+  gatewayFeeAmount Decimal? @db.Decimal(10, 2)
+  gatewayTaxAmount Decimal? @db.Decimal(10, 2)
+  commissionAmount Decimal? @db.Decimal(10, 2) // 7% flat per build-phases doc, computed at capture time
+  payoutAmount     Decimal? @db.Decimal(10, 2) // amount - commission - fee - tax
+
+  razorpayTransferId String? @unique // the held Route transfer to the seller's linked account
+
+  payoutStatus     PayoutStatus @default(HELD)
+  payoutReleasedAt DateTime?
+
+  paidAt      DateTime?
+  deliveredAt DateTime? // set in Phase 5 when the buyer confirms delivery
+
+  currentForAuction Auction? @relation("AuctionCurrentTransaction")
+  ledgerEntries     EscrowLedgerEntry[]
+  deliveryProof     DeliveryProof?
+  disputes          Dispute[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([auctionId])
+  @@map("transactions")
+}
+
+// Append-only by convention: nothing in this codebase should ever call
+// .update() or .delete() on this model. Every state change is a NEW row, so
+// a transaction's complete history — held, delivered, released, disputed,
+// whatever — is reconstructable forever, per tech stack §5's "immutable
+// ledger" requirement. If you're tempted to "fix" a ledger row, write a
+// correcting entry instead, the way accounting ledgers always have.
+model EscrowLedgerEntry {
+  id            String          @id @default(uuid())
+  transactionId String
+  transaction   Transaction     @relation(fields: [transactionId], references: [id])
+  eventType     EscrowEventType
+  amount        Decimal?        @db.Decimal(10, 2)
+  metadata      Json? // razorpay ids, actor, reason — whatever's relevant to this specific event
+  createdAt     DateTime        @default(now())
+
+  @@index([transactionId, createdAt])
+  @@map("escrow_ledger")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5 — Shipping & Proof of Condition
+// ---------------------------------------------------------------------------
+
+// One row per transaction. PRD §4.6: seller photographs pre-dispatch, ships,
+// records tracking; buyer photographs on receipt. Both photo sets are
+// permanent and become the reference in any dispute (Phase 6) — nothing here
+// is ever deleted, only appended to as each side completes their step.
+model DeliveryProof {
+  id            String      @id @default(uuid())
+  transactionId String      @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  sellerPredispatchPhotos String[] // R2 keys
+  courierName             String?
+  trackingNumber          String?
+  predispatchUploadedAt   DateTime?
+
+  buyerReceiptPhotos String[]
+  receiptUploadedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("delivery_proofs")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6 — Disputes & Admin Ops
+// ---------------------------------------------------------------------------
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+}
+
+enum DisputeResolution {
+  PENDING
+  FULL_REFUND
+  PARTIAL_REFUND
+  NO_REFUND
+}
+
+// PRD §5's literal schema has no column for the actual refund amount — added
+// here since Phase 6's own "done when" requires issuing a real refund, which
+// needs a concrete amount to record. The resolution amount is always an
+// admin's per-case judgment call (the PRD frames it as comparing photos and
+// deciding, not applying a formula) — this column captures that decision,
+// it doesn't compute it.
+model Dispute {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  raisedById String
+  raisedBy   User   @relation("DisputesRaisedBy", fields: [raisedById], references: [id])
+  reason     String
+
+  status     DisputeStatus     @default(OPEN)
+  resolution DisputeResolution @default(PENDING)
+  refundAmount Decimal?        @db.Decimal(10, 2)
+
+  resolvedById String?
+  resolvedBy   User?   @relation("DisputesResolvedBy", fields: [resolvedById], references: [id])
+  resolvedAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([transactionId])
+  @@index([status])
+  @@map("disputes")
+}
