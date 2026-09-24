@@ -7,10 +7,11 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
 
 import { AuthProvider } from "./context/AuthContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import RoleSwitcher from "./components/RoleSwitcher";
 
 function App() {
-  const [introComplete, setIntroComplete] =
-    useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
 
   const handleIntroComplete = useCallback(() => {
     setIntroComplete(true);
@@ -26,7 +27,10 @@ function App() {
 
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <WishlistProvider>
+        <RouterProvider router={router} />
+        <RoleSwitcher />
+      </WishlistProvider>
     </AuthProvider>
   );
 }

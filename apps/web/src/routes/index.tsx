@@ -1,4 +1,4 @@
-﻿import {
+import {
   createBrowserRouter,
   Navigate,
   Outlet,
@@ -16,17 +16,74 @@ import Unauthorized from "../pages/errors/Unauthorized";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import PermissionRoute from "../components/auth/PermissionRoute";
 
-import BidderDashboard from "../pages/dashboard/BidderDashboard";
-import SellerDashboard from "../pages/dashboard/SellerDashboard";
-import VerifierDashboard from "../pages/dashboard/VerifierDashboard";
-import AuctioneerDashboard from "../pages/dashboard/AuctioneerDashboard";
-import AdminDashboard from "../pages/dashboard/AdminDashboard";
 
-import AuctioneerAuctions from "../pages/auctioneer/AuctioneerAuctions";
-import AuctioneerSchedule from "../pages/auctioneer/AuctioneerSchedule";
-import AuctioneerLiveControl from "../pages/auctioneer/AuctioneerLiveControl";
-import AuctioneerBidActivity from "../pages/auctioneer/AuctioneerBidActivity";
-import AuctioneerResults from "../pages/auctioneer/AuctioneerResults";
+import BidderOverview from "../pages/dashboard/bidder/Overview";
+import BidderAuctions from "../pages/dashboard/bidder/LiveAuctions";
+import BidderMyBids from "../pages/dashboard/bidder/MyBids";
+import BidderWonAuctions from "../pages/dashboard/bidder/WonAuctions";
+import BidderWatchlist from "../pages/dashboard/bidder/Watchlist";
+import BidderOrders from "../pages/dashboard/bidder/Orders";
+import BidderTransactions from "../pages/dashboard/bidder/Transactions";
+import BidderDisputes from "../pages/dashboard/bidder/Disputes";
+import BidderMessages from "../pages/dashboard/bidder/Messages";
+import BidderPayouts from "../pages/dashboard/bidder/Payouts";
+import BidderAccount from "../pages/dashboard/bidder/MyAccount";
+import BidderSettings from "../pages/dashboard/bidder/Settings";
+
+
+import SellerOverview from "../pages/dashboard/seller/Overview";
+import SellerListings from "../pages/dashboard/seller/MyListings";
+import SellerVerification from "../pages/dashboard/seller/Verification";
+import SellerAuctions from "../pages/dashboard/seller/MyAuctions";
+import SellerOrders from "../pages/dashboard/seller/Orders";
+import SellerDisputes from "../pages/dashboard/seller/Disputes";
+import SellerMessages from "../pages/dashboard/seller/Messages";
+import SellerPayouts from "../pages/dashboard/seller/Payouts";
+import SellerSettings from "../pages/dashboard/seller/Settings";
+
+
+
+
+import VerifierOverview from "../pages/dashboard/verifier/Overview";
+import VerifierQueue from "../pages/dashboard/verifier/VerificationQueue";
+import VerifierDetail from "../pages/dashboard/verifier/VerificationDetail";
+import VerifierScheduled from "../pages/dashboard/verifier/Scheduled";
+import VerifierCompleted from "../pages/dashboard/verifier/Completed";
+import VerifierRejections from "../pages/dashboard/verifier/Rejections";
+import VerifierReports from "../pages/dashboard/verifier/Reports";
+import VerifierMessages from "../pages/dashboard/verifier/Messages";
+import VerifierSettings from "../pages/dashboard/verifier/Settings";
+
+
+import AuctOverview from "../pages/dashboard/auctioneer/Overview";
+import AuctAuctions from "../pages/dashboard/auctioneer/Auctions";
+import AuctCreate from "../pages/dashboard/auctioneer/CreateAuction";
+import AuctSchedule from "../pages/dashboard/auctioneer/Schedule";
+import AuctLiveControl from "../pages/dashboard/auctioneer/LiveControl";
+import AuctBidActivity from "../pages/dashboard/auctioneer/BidActivity";
+import AuctResults from "../pages/dashboard/auctioneer/Results";
+import AuctUsers from "../pages/dashboard/auctioneer/Users";
+import AuctOrders from "../pages/dashboard/auctioneer/Orders";
+import AuctTransactions from "../pages/dashboard/auctioneer/Transactions";
+import AuctDisputes from "../pages/dashboard/auctioneer/Disputes";
+import AuctMessages from "../pages/dashboard/auctioneer/Messages";
+import AuctPayouts from "../pages/dashboard/auctioneer/Payouts";
+import AuctAccount from "../pages/dashboard/auctioneer/MyAccount";
+import AuctSettings from "../pages/dashboard/auctioneer/Settings";
+
+
+import AdminOverview from "../pages/dashboard/admin/Overview";
+import AdminUsers from "../pages/dashboard/admin/Users";
+import AdminAuctions from "../pages/dashboard/admin/Auctions";
+import AdminVerification from "../pages/dashboard/admin/Verification";
+import AdminTransactions from "../pages/dashboard/admin/Transactions";
+import AdminOrders from "../pages/dashboard/admin/Orders";
+import AdminDisputes from "../pages/dashboard/admin/Disputes";
+import AdminReports from "../pages/dashboard/admin/Reports";
+import AdminMessages from "../pages/dashboard/admin/Messages";
+import AdminSettings from "../pages/dashboard/admin/Settings";
+
+
 
 import VerificationQueue from "../pages/verification/VerificationQueue";
 import VerificationRequest from "../pages/verification/VerificationRequest";
@@ -51,9 +108,9 @@ import Delivery from "../pages/bidding/Delivery";
 
 import AuctionList from "../pages/auctions/AuctionList";
 import AuctionDetail from "../pages/auctions/AuctionDetail";
+import CategoryDashboard from "../pages/auctions/CategoryDashboard";
 
-import SellerDisputes from "../pages/disputes/SellerDisputes";
-import AdminDisputes from "../pages/disputes/AdminDisputes";
+
 
 import Profile from "../pages/profile/Profile";
 
@@ -184,6 +241,11 @@ export const router = createBrowserRouter([
       },
 
       {
+        path: "/category/:slug",
+        element: <CategoryDashboard />,
+      },
+
+      {
         path: "/login",
         element: <LoginRoute />,
       },
@@ -250,18 +312,20 @@ export const router = createBrowserRouter([
 
           {
             path: "/dashboard/bidder",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["bidder"]}
-              />
-            ),
-
+            element: <ProtectedRoute allowedRoles={["bidder"]} />,
             children: [
-              {
-                index: true,
-                element: <BidderDashboard />,
-              },
+              { index: true, element: <BidderOverview /> },
+              { path: "auctions", element: <BidderAuctions /> },
+              { path: "my-bids", element: <BidderMyBids /> },
+              { path: "won", element: <BidderWonAuctions /> },
+              { path: "watchlist", element: <BidderWatchlist /> },
+              { path: "orders", element: <BidderOrders /> },
+              { path: "transactions", element: <BidderTransactions /> },
+              { path: "disputes", element: <BidderDisputes /> },
+              { path: "messages", element: <BidderMessages /> },
+              { path: "payouts", element: <BidderPayouts /> },
+              { path: "account", element: <BidderAccount /> },
+              { path: "settings", element: <BidderSettings /> }
             ],
           },
 
@@ -362,41 +426,21 @@ export const router = createBrowserRouter([
 
           {
             path: "/dashboard/seller",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["seller"]}
-              />
-            ),
-
+            element: <ProtectedRoute allowedRoles={["seller"]} />,
             children: [
-              {
-                index: true,
-                element: <SellerDashboard />,
-              },
+              { index: true, element: <SellerOverview /> },
+              { path: "listings", element: <SellerListings /> },
+              { path: "verification", element: <SellerVerification /> },
+              { path: "auctions", element: <SellerAuctions /> },
+              { path: "orders", element: <SellerOrders /> },
+              { path: "disputes", element: <SellerDisputes /> },
+              { path: "messages", element: <SellerMessages /> },
+              { path: "payouts", element: <SellerPayouts /> },
+              { path: "settings", element: <SellerSettings /> }
             ],
           },
 
-          /* =================================================
-             SELLER DISPUTES
-             ================================================= */
 
-          {
-            path: "/dashboard/seller/disputes",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["seller"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <SellerDisputes />,
-              },
-            ],
-          },
 
           /* =================================================
              VERIFIER DASHBOARD
@@ -404,18 +448,17 @@ export const router = createBrowserRouter([
 
           {
             path: "/dashboard/verifier",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
+            element: <ProtectedRoute allowedRoles={["verifier"]} />,
             children: [
-              {
-                index: true,
-                element: <VerifierDashboard />,
-              },
+              { index: true, element: <VerifierOverview /> },
+              { path: "queue", element: <VerifierQueue /> },
+              { path: "queue/:id", element: <VerifierDetail /> },
+              { path: "scheduled", element: <VerifierScheduled /> },
+              { path: "completed", element: <VerifierCompleted /> },
+              { path: "rejections", element: <VerifierRejections /> },
+              { path: "reports", element: <VerifierReports /> },
+              { path: "messages", element: <VerifierMessages /> },
+              { path: "settings", element: <VerifierSettings /> }
             ],
           },
 
@@ -425,125 +468,35 @@ export const router = createBrowserRouter([
 
           {
             path: "/dashboard/auctioneer",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["auctioneer"]}
-              />
-            ),
-
+            element: <ProtectedRoute allowedRoles={["auctioneer"]} />,
             children: [
-              {
-                index: true,
-                element: <AuctioneerDashboard />,
-              },
+              { index: true, element: <AuctOverview /> },
+              { path: "auctions", element: <AuctAuctions /> },
+              { path: "auctions/create", element: <AuctCreate /> },
+              { path: "schedule", element: <AuctSchedule /> },
+              { path: "live", element: <AuctLiveControl /> },
+              { path: "activity", element: <AuctBidActivity /> },
+              { path: "results", element: <AuctResults /> },
+              { path: "users", element: <AuctUsers /> },
+              { path: "orders", element: <AuctOrders /> },
+              { path: "transactions", element: <AuctTransactions /> },
+              { path: "disputes", element: <AuctDisputes /> },
+              { path: "messages", element: <AuctMessages /> },
+              { path: "payouts", element: <AuctPayouts /> },
+              { path: "account", element: <AuctAccount /> },
+              { path: "settings", element: <AuctSettings /> }
             ],
           },
 
-          /* =================================================
-             AUCTIONEER AUCTIONS
-             ================================================= */
+          
 
-          {
-            path: "/auctioneer/auctions",
+          
 
-            element: (
-              <ProtectedRoute
-                allowedRoles={["auctioneer"]}
-              />
-            ),
+          
 
-            children: [
-              {
-                index: true,
-                element: <AuctioneerAuctions />,
-              },
-            ],
-          },
+          
 
-          /* =================================================
-             AUCTIONEER SCHEDULE
-             ================================================= */
-
-          {
-            path: "/auctioneer/schedule",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["auctioneer"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <AuctioneerSchedule />,
-              },
-            ],
-          },
-
-          /* =================================================
-             AUCTIONEER LIVE CONTROL
-             ================================================= */
-
-          {
-            path: "/auctioneer/live",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["auctioneer"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <AuctioneerLiveControl />,
-              },
-            ],
-          },
-
-          /* =================================================
-             AUCTIONEER BID ACTIVITY
-             ================================================= */
-
-          {
-            path: "/auctioneer/activity",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["auctioneer"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <AuctioneerBidActivity />,
-              },
-            ],
-          },
-
-          /* =================================================
-             AUCTIONEER RESULTS
-             ================================================= */
-
-          {
-            path: "/auctioneer/results",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["auctioneer"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <AuctioneerResults />,
-              },
-            ],
-          },
+          
 
           /* =================================================
              ADMIN DASHBOARD
@@ -551,41 +504,22 @@ export const router = createBrowserRouter([
 
           {
             path: "/dashboard/admin",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["admin"]}
-              />
-            ),
-
+            element: <ProtectedRoute allowedRoles={["admin"]} />,
             children: [
-              {
-                index: true,
-                element: <AdminDashboard />,
-              },
+              { index: true, element: <AdminOverview /> },
+              { path: "users", element: <AdminUsers /> },
+              { path: "auctions", element: <AdminAuctions /> },
+              { path: "verification", element: <AdminVerification /> },
+              { path: "transactions", element: <AdminTransactions /> },
+              { path: "orders", element: <AdminOrders /> },
+              { path: "disputes", element: <AdminDisputes /> },
+              { path: "reports", element: <AdminReports /> },
+              { path: "messages", element: <AdminMessages /> },
+              { path: "settings", element: <AdminSettings /> }
             ],
           },
 
-          /* =================================================
-             ADMIN DISPUTES
-             ================================================= */
-
-          {
-            path: "/dashboard/admin/disputes",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["admin"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <AdminDisputes />,
-              },
-            ],
-          },
+          
 
           /* =================================================
              AUCTIONS
@@ -708,171 +642,7 @@ export const router = createBrowserRouter([
             ],
           },
 
-          /* =================================================
-             VERIFICATION QUEUE
-             ================================================= */
-
-          {
-            path: "/verification/queue",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
-            children: [
-              {
-                element: (
-                  <PermissionRoute
-                    permission="verification.queue.view"
-                  />
-                ),
-
-                children: [
-                  {
-                    index: true,
-                    element: <VerificationQueue />,
-                  },
-                ],
-              },
-            ],
-          },
-
-          /* =================================================
-             VERIFICATION REQUEST DETAIL
-             ================================================= */
-
-          {
-            path: "/verification/requests/:id",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
-            children: [
-              {
-                element: (
-                  <PermissionRoute
-                    permission="verification.queue.view"
-                  />
-                ),
-
-                children: [
-                  {
-                    index: true,
-                    element: <VerificationRequest />,
-                  },
-                ],
-              },
-            ],
-          },
-
-          /* =================================================
-             VERIFICATION SCHEDULE
-             ================================================= */
-
-          {
-            path: "/verification/requests/:id/schedule",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
-            children: [
-              {
-                element: (
-                  <PermissionRoute
-                    permission="verification.queue.view"
-                  />
-                ),
-
-                children: [
-                  {
-                    index: true,
-                    element: <VerificationSchedule />,
-                  },
-                ],
-              },
-            ],
-          },
-
-          /* =================================================
-             VERIFICATION COMPLETE
-             ================================================= */
-
-          {
-            path: "/verification/requests/:id/complete",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
-            children: [
-              {
-                element: (
-                  <PermissionRoute
-                    permission="verification.queue.view"
-                  />
-                ),
-
-                children: [
-                  {
-                    index: true,
-                    element: <VerificationComplete />,
-                  },
-                ],
-              },
-            ],
-          },
-
-          /* =================================================
-             SCHEDULED VERIFICATION VISITS
-             ================================================= */
-
-          {
-            path: "/verification/scheduled",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <VerificationScheduled />,
-              },
-            ],
-          },
-
-          /* =================================================
-             COMPLETED VERIFICATION WORK
-             ================================================= */
-
-          {
-            path: "/verification/completed",
-
-            element: (
-              <ProtectedRoute
-                allowedRoles={["verifier"]}
-              />
-            ),
-
-            children: [
-              {
-                index: true,
-                element: <VerificationCompleted />,
-              },
-            ],
-          },
+          
         ],
       },
 

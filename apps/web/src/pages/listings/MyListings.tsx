@@ -235,7 +235,7 @@ export default function MyListings() {
                       className="listing-card"
                     >
                       <div className="listing-card-image">
-                        {listing.photos.length >
+                        {(listing.photos?.length || 0) >
                         0 ? (
                           <img
                             src={

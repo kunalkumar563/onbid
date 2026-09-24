@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import {
   Link,
+  NavLink,
   useNavigate,
 } from "react-router-dom";
 
@@ -90,11 +92,27 @@ function ChevronDown() {
   );
 }
 
+
+const CURRENCIES = [
+  { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳' },
+  { code: 'USD', name: 'US Dollar', flag: '🇺🇸' },
+  { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
+  { code: 'GBP', name: 'British Pound', flag: '🇬🇧' },
+  { code: 'JPY', name: 'Japanese Yen', flag: '🇯🇵' },
+  { code: 'CAD', name: 'Canadian Dollar', flag: '🇨🇦' },
+  { code: 'AUD', name: 'Australian Dollar', flag: '🇦🇺' },
+  { code: 'SGD', name: 'Singapore Dollar', flag: '🇸🇬' },
+  { code: 'AED', name: 'UAE Dirham', flag: '🇦🇪' },
+];
+
 export default function HomeHeader() {
   const navigate = useNavigate();
 
   const [mobileOpen, setMobileOpen] =
     useState<boolean>(false);
+
+  const [currencyOpen, setCurrencyOpen] = useState<boolean>(false);
+  const [selectedCurrency, setSelectedCurrency] = useState(CURRENCIES[0]);
 
   const [searchValue, setSearchValue] =
     useState<string>("");
@@ -125,11 +143,11 @@ export default function HomeHeader() {
   const getCategoryUrl = (
     slug: string,
   ): string => {
-    return `/auctions?category=${encodeURIComponent(slug)}`;
+    return `/category/${encodeURIComponent(slug)}`;
   };
 
   const handleAllCategories = (): void => {
-    navigate("/auctions");
+    navigate("/category/all");
     closeMobileMenu();
   };
 
@@ -189,13 +207,7 @@ export default function HomeHeader() {
           aria-label="ONBID Home"
           onClick={closeMobileMenu}
         >
-          <span className="logo-name">
-            ONBID
-          </span>
-
-          <span className="logo-tagline">
-            PREMIUM AUCTIONS
-          </span>
+          <img src="/auctions/onbid-logo.png" alt="ONBID" style={{ height: "45px", width: "auto", maxWidth: "150px", objectFit: "contain", objectPosition: "left" }} />
         </Link>
 
         {/* SEARCH */}
@@ -235,19 +247,41 @@ export default function HomeHeader() {
         <div className="header-actions">
           {/* CURRENCY */}
 
-          <button
-            type="button"
-            className="currency-button"
-            aria-label="Currency"
-          >
-            <span className="india-flag">
-              🇮🇳
-            </span>
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              className="currency-button"
+              aria-label="Currency"
+              onClick={() => setCurrencyOpen(!currencyOpen)}
+            >
+              <span className="india-flag">
+                {selectedCurrency.flag}
+              </span>
 
-            <span>INR</span>
+              <span>{selectedCurrency.code}</span>
 
-            <ChevronDown />
-          </button>
+              <ChevronDown />
+            </button>
+
+            {currencyOpen && (
+              <div className="currency-dropdown">
+                {CURRENCIES.map(curr => (
+                  <button 
+                    key={curr.code} 
+                    className={`currency-dropdown-item ${selectedCurrency.code === curr.code ? 'active' : ''}`}
+                    onClick={() => {
+                      setSelectedCurrency(curr);
+                      setCurrencyOpen(false);
+                    }}
+                  >
+                    <span style={{ fontSize: '16px' }}>{curr.flag}</span>
+                    <span style={{ fontWeight: 600 }}>{curr.code}</span>
+                    <span style={{ color: '#888', fontSize: '11px', marginLeft: '5px' }}>{curr.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* WISHLIST */}
 
@@ -321,20 +355,7 @@ export default function HomeHeader() {
             <span>LIVE</span>
           </button>
 
-          {/* ALL CATEGORIES */}
-
-          <button
-            type="button"
-            className="all-categories"
-            onClick={handleAllCategories}
-            aria-label="View all categories"
-          >
-            <span>
-              All Categories
-            </span>
-
-            <ChevronDown />
-          </button>
+  
 
           {/* CATEGORY TABS */}
 
@@ -342,16 +363,30 @@ export default function HomeHeader() {
             className="category-navigation"
             aria-label="Auction categories"
           >
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              Home
+            </NavLink>
+            <NavLink
+              to="/category/all"
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              All Categories
+            </NavLink>
             {categories.map(
               (category) => (
-                <Link
+                <NavLink
                   key={category.slug}
                   to={getCategoryUrl(
                     category.slug,
                   )}
+                  className={({ isActive }) => (isActive ? "active" : "")}
                 >
                   {category.name}
-                </Link>
+                </NavLink>
               ),
             )}
           </nav>
@@ -392,27 +427,25 @@ export default function HomeHeader() {
           />
         </form>
 
-        {/* LIVE */}
-
+        {/* HOME & ALL CATEGORIES */}
+        <Link
+          to="/"
+          className="mobile-navigation-button"
+          style={{ textDecoration: 'none', fontWeight: 600, color: '#1a1a1a', display: 'block', padding: '15px 0' }}
+          onClick={closeMobileMenu}
+        >
+          Home
+        </Link>
         <button
           type="button"
           className="mobile-navigation-button"
-          onClick={handleLiveAuctions}
-        >
-          <span className="mobile-live-dot" />
-
-          Live Auctions
-        </button>
-
-        {/* ALL CATEGORIES */}
-
-        <button
-          type="button"
-          className="mobile-category-title mobile-navigation-button"
+          style={{ border: 'none', background: 'none', textAlign: 'left', fontWeight: 600, color: '#1a1a1a', display: 'block', padding: '15px 0', cursor: 'pointer', width: '100%' }}
           onClick={handleAllCategories}
         >
-          ALL CATEGORIES
+          All Categories
         </button>
+
+
 
         {/* CATEGORIES */}
 

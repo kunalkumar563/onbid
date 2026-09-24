@@ -1,4 +1,9 @@
 {
+  "name": "onbid-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "dependencies": {
     "framer-motion": "^13.1.1"
   }

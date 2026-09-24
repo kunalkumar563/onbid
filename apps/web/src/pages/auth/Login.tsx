@@ -74,9 +74,7 @@ function LoginPage({
   return (
     <main className="login">
       <div className="login-content">
-        <div className="login-brand">
-          ONBID
-        </div>
+        <div className="login-brand"><img src="/auctions/onbid-logo.png" alt="ONBID" style={{ height: "70px", width: "100%", maxWidth: "250px", objectFit: "contain", marginBottom: "20px" }} /></div>
 
         <div className="login-live">
           <span />

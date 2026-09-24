@@ -18,135 +18,76 @@ const ROLE_NAVIGATION: Record<
   NavigationItem[]
 > = {
   bidder: [
-    {
-      label: "Overview",
-      path: "/dashboard/bidder",
-    },
-    {
-      label: "Live Auctions",
-      path: "/auctions", // was /live-auctions — no such route; this is the real browse page
-    },
-    {
-      label: "My Bids",
-      path: "/my-bids",
-    },
-    {
-      label: "Won Auctions",
-      path: "/transactions", // was /won-auctions — no such route; Transactions now shows won/awaiting-payment items
-    },
-    {
-      label: "Watchlist",
-      path: "/wishlist",
-    },
-    {
-      label: "Transactions",
-      path: "/transactions",
-    },
-    // "Disputes" removed here — no bidder-facing dispute page exists yet
-    // (only /dashboard/seller/disputes and the admin queue do), even though
-    // the backend already allows either party to raise one. Flagged as a
-    // frontend gap rather than left as a dead link.
+    { label: "Overview", path: "/dashboard/bidder" },
+    { label: "Live Auctions", path: "/dashboard/bidder/auctions" },
+    { label: "My Bids", path: "/dashboard/bidder/my-bids" },
+    { label: "Won Auctions", path: "/dashboard/bidder/won" },
+    { label: "Watchlist", path: "/dashboard/bidder/watchlist" },
+    { label: "Orders", path: "/dashboard/bidder/orders" },
+    { label: "Transactions", path: "/dashboard/bidder/transactions" },
+    { label: "Disputes", path: "/dashboard/bidder/disputes" },
+    { label: "Messages", path: "/dashboard/bidder/messages" },
+    { label: "Payouts & Wallet", path: "/dashboard/bidder/payouts" },
+    { label: "My Account", path: "/dashboard/bidder/account" },
+    { label: "Settings", path: "/dashboard/bidder/settings" }
   ],
 
   seller: [
-    {
-      label: "Overview",
-      path: "/dashboard/seller",
-    },
-    {
-      label: "My Listings",
-      path: "/my-listings",
-    },
-    {
-      label: "Create Listing",
-      path: "/listings/create",
-    },
-    {
-      label: "Verification",
-      path: "/my-listings", // was /verification — no standalone page; requesting verification happens per-listing from here
-    },
-    {
-      label: "My Auctions",
-      path: "/my-listings", // was /my-auctions — same underlying data, no separate live-only view exists
-    },
-    {
-      label: "Orders",
-      path: "/transactions", // was /orders — no such route; Transactions now includes sales, not just purchases
-    },
-    {
-      label: "Disputes",
-      path: "/dashboard/seller/disputes",
-    },
+    { label: "Overview", path: "/dashboard/seller" },
+    { label: "My Listings", path: "/dashboard/seller/listings" },
+    { label: "Create Listing", path: "/listings/create" },
+    { label: "Verification", path: "/dashboard/seller/verification" },
+    { label: "My Auctions", path: "/dashboard/seller/auctions" },
+    { label: "Orders", path: "/dashboard/seller/orders" },
+    { label: "Disputes", path: "/dashboard/seller/disputes" },
+    { label: "Messages", path: "/dashboard/seller/messages" },
+    { label: "Payouts", path: "/dashboard/seller/payouts" },
+    { label: "Settings", path: "/dashboard/seller/settings" }
   ],
 
   verifier: [
-    {
-      label: "Overview",
-      path: "/dashboard/verifier",
-    },
-    {
-      label: "Verification Queue",
-      path: "/verification/queue",
-    },
-    {
-      label: "Scheduled",
-      path: "/verification/scheduled",
-    },
-    {
-      label: "Completed",
-      path: "/verification/completed",
-    },
-    // "Verification History" removed — /verification/history doesn't
-    // exist; Completed above already covers this same data.
+    { label: "Overview", path: "/dashboard/verifier" },
+    { label: "Verification Queue", path: "/dashboard/verifier/queue" },
+    { label: "Scheduled", path: "/dashboard/verifier/scheduled" },
+    { label: "Completed", path: "/dashboard/verifier/completed" },
+    { label: "Rejections", path: "/dashboard/verifier/rejections" },
+    { label: "Reports", path: "/dashboard/verifier/reports" },
+    { label: "Messages", path: "/dashboard/verifier/messages" },
+    { label: "Settings", path: "/dashboard/verifier/settings" }
   ],
 
   // Left entirely untouched — real planned feature, not wired to any
   // backend yet, per explicit direction to treat this as a future phase
   // rather than something to fix or hide for this pass.
   auctioneer: [
-    {
-      label: "Overview",
-      path: "/dashboard/auctioneer",
-    },
-    {
-      label: "Auctions",
-      path: "/auctioneer/auctions",
-    },
-    {
-      label: "Schedule",
-      path: "/auctioneer/schedule",
-    },
-    {
-      label: "Live Control",
-      path: "/auctioneer/live",
-    },
-    {
-      label: "Bid Activity",
-      path: "/auctioneer/activity",
-    },
-    {
-      label: "Auction Results",
-      path: "/auctioneer/results",
-    },
+    { label: "Overview", path: "/dashboard/auctioneer" },
+    { label: "Auctions", path: "/dashboard/auctioneer/auctions" },
+    { label: "Schedule", path: "/dashboard/auctioneer/schedule" },
+    { label: "Live Control", path: "/dashboard/auctioneer/live" },
+    { label: "Bid Activity", path: "/dashboard/auctioneer/activity" },
+    { label: "Auction Results", path: "/dashboard/auctioneer/results" },
+    { label: "Users & Bidders", path: "/dashboard/auctioneer/users" },
+    { label: "Orders", path: "/dashboard/auctioneer/orders" },
+    { label: "Transactions", path: "/dashboard/auctioneer/transactions" },
+    { label: "Disputes", path: "/dashboard/auctioneer/disputes" },
+    { label: "Messages", path: "/dashboard/auctioneer/messages" },
+    { label: "Payouts", path: "/dashboard/auctioneer/payouts" },
+    { label: "My Account", path: "/dashboard/auctioneer/account" },
+    { label: "Settings", path: "/dashboard/auctioneer/settings" }
   ],
 
   admin: [
-    {
-      label: "Overview",
-      path: "/dashboard/admin",
-    },
-    {
-      label: "Disputes",
-      path: "/dashboard/admin/disputes", // was the wrong path (/admin/disputes) even for this one real page
-    },
-    // Users, Roles & Permissions, Auctions, Listings, Verification,
-    // Transactions, and Platform were all removed from this list — none of
-    // them have a frontend page yet. Verification's *backend* is ready
-    // (GET /api/admin/verification-requests, GET /api/admin/verifiers) and
-    // waiting for a page to call it; the rest need both a page and, in
-    // most cases, backend endpoints that don't exist yet either. All
-    // flagged in the final report rather than left as dead links.
-  ],
+    { label: "Overview", path: "/dashboard/admin" },
+    { label: "Users & Roles", path: "/dashboard/admin/users" },
+    { label: "Auctions", path: "/dashboard/admin/auctions" },
+    { label: "Verification", path: "/dashboard/admin/verification" },
+    { label: "Transactions", path: "/dashboard/admin/transactions" },
+    { label: "Orders", path: "/dashboard/admin/orders" },
+    { label: "Disputes", path: "/dashboard/admin/disputes" },
+    { label: "Reports", path: "/dashboard/admin/reports" },
+    { label: "Messages", path: "/dashboard/admin/messages" },
+    { label: "Settings", path: "/dashboard/admin/settings" }
+  ]
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -210,7 +151,7 @@ function DashboardSidebar({
         >
           {navigation.map((item) => (
             <NavLink
-              key={item.path}
+              key={item.label}
               to={item.path}
               end={item.path.startsWith(
                 "/dashboard/",
@@ -229,6 +170,14 @@ function DashboardSidebar({
         </nav>
 
         <div className="dashboard-sidebar-bottom">
+          <NavLink
+            to="/"
+            onClick={onClose}
+            className="dashboard-nav-secondary"
+            style={{ marginBottom: '10px' }}
+          >
+            ← Back to Home
+          </NavLink>
           <NavLink
             to="/profile"
             onClick={onClose}

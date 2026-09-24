@@ -545,7 +545,8 @@
 
   color: #766b7c !important;
 
-  font-size: 9px;
+  font-size: 13px;
+  font-weight: 500;
 
   white-space: nowrap;
 
@@ -572,11 +573,13 @@
   transition: transform 180ms ease;
 }
 
-.category-navigation a:hover {
+.category-navigation a:hover,
+.category-navigation a.active {
   color: var(--purple) !important;
 }
 
-.category-navigation a:hover::after {
+.category-navigation a:hover::after,
+.category-navigation a.active::after {
   transform: scaleX(1);
 }
 
@@ -2485,17 +2488,20 @@
     border-bottom-width: 1px;
   }
 
-  .mobile-navigation a {
-    padding: 12px 0;
+  .mobile-navigation a,
+  .mobile-navigation button {
+    padding: 15px 0;
 
     color: #33283c !important;
 
-    font-size: 12px;
+    font-size: 15px;
+    font-weight: 500;
 
     text-decoration: none;
   }
 
-  .mobile-navigation a:hover {
+  .mobile-navigation a:hover,
+  .mobile-navigation button:hover {
     color: var(--purple-soft) !important;
   }
 
@@ -2542,7 +2548,7 @@
   }
 
   .hero-copy h1 {
-    font-size: 56px;
+    font-size: 42px;
   }
 
   .hero-copy > p {
@@ -2734,28 +2740,68 @@
 @media (max-width: 430px) {
 
   .hero-copy h1 {
-    font-size: 50px;
+    font-size: 34px;
   }
 
   .section-top h2,
   .section-heading-row h2,
   .live-heading h2 {
-    font-size: 47px;
+    font-size: 32px;
   }
 
   .brand-statement-main {
-    font-size: 57px;
+    font-size: 38px;
   }
 
   .seller-copy h2 {
-    font-size: 48px;
+    font-size: 32px;
   }
 
   .trust-title h2 {
-    font-size: 50px;
+    font-size: 34px;
   }
 
   .final-cta h2 {
-    font-size: 55px;
+    font-size: 38px;
   }
+}
+/* Currency Dropdown */
+.currency-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #f0ebf5;
+  width: 220px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.currency-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.currency-dropdown-item:hover {
+  background: #f8f6fb;
+}
+
+.currency-dropdown-item.active {
+  background: #f0ebf5;
+  color: var(--purple-dark);
 }

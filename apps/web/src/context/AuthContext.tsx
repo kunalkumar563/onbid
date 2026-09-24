@@ -30,58 +30,40 @@ type AuthContextValue = {
   user: AuthUser | null;
   status: AuthStatus;
   isAuthenticated: boolean;
-
   role: UserRole | null;
   permissions: Permission[];
-
-  hasPermission: (
-    permission: Permission,
-  ) => boolean;
-
-  hasAnyPermission: (
-    permissions: Permission[],
-  ) => boolean;
-
-  hasAllPermissions: (
-    permissions: Permission[],
-  ) => boolean;
-
+  hasPermission: (permission: Permission) => boolean;
+  hasAnyPermission: (permissions: Permission[]) => boolean;
+  hasAllPermissions: (permissions: Permission[]) => boolean;
   refreshUser: () => Promise<void>;
   clearSession: () => void;
   logout: () => Promise<void>;
+  switchRole: (newRole: UserRole) => void;
 };
 
-const AuthContext =
-  createContext<AuthContextValue | undefined>(
-    undefined,
-  );
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-type AuthProviderProps = {
-  children: ReactNode;
-};
+type AuthProviderProps = { children: ReactNode; };
 
-export function AuthProvider({
-  children,
-}: AuthProviderProps) {
-  const [user, setUser] =
-    useState<AuthUser | null>(null);
-
-  const [status, setStatus] =
-    useState<AuthStatus>("loading");
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [status, setStatus] = useState<AuthStatus>("loading");
 
   const refreshUser = async () => {
-    try {
-      setStatus("loading");
+    const savedRole = (localStorage.getItem("onbid_demo_role") as UserRole) || "bidder";
+    setUser({
+      id: "dummy-user-123",
+      fullName: "Test User",
+      email: "test@example.com",
+      role: savedRole,
+    });
+    setStatus("authenticated");
+  };
 
-      const response =
-        await authService.getCurrentUser();
-
-      setUser(response.user);
-      setStatus("authenticated");
-    } catch {
-      setUser(null);
-      setStatus("unauthenticated");
-    }
+  const switchRole = (newRole: UserRole) => {
+    localStorage.setItem("onbid_demo_role", newRole);
+    setUser(prev => prev ? { ...prev, role: newRole } : null);
+    window.location.href = "/dashboard";
   };
 
   const clearSession = () => {
@@ -90,97 +72,32 @@ export function AuthProvider({
   };
 
   const logout = async () => {
-    try {
-      await authService.logout();
-    } finally {
-      clearSession();
-    }
+    clearSession();
   };
 
   useEffect(() => {
     void refreshUser();
   }, []);
 
-  const role =
-    user?.role ?? null;
+  const role = user?.role ?? null;
+  const permissions = user?.permissions ?? (role ? ROLE_PERMISSIONS[role] : []);
 
-  /*
-   * Backend permissions take priority.
-   * If backend doesn't send permissions,
-   * use the application's role-permission map.
-   */
-  const permissions =
-    user?.permissions ??
-    (role
-      ? ROLE_PERMISSIONS[role]
-      : []);
-
-  const permissionChecker = useMemo(
-    () => ({
-      hasPermission: (
-        permission: Permission,
-      ) =>
-        role
-          ? checkPermission(
-              role,
-              permission,
-            )
-          : false,
-
-      hasAnyPermission: (
-        requiredPermissions: Permission[],
-      ) =>
-        role
-          ? checkAnyPermissions(
-              role,
-              requiredPermissions,
-            )
-          : false,
-
-      hasAllPermissions: (
-        requiredPermissions: Permission[],
-      ) =>
-        role
-          ? checkAllPermissions(
-              role,
-              requiredPermissions,
-            )
-          : false,
-    }),
-    [role],
-  );
+  const permissionChecker = useMemo(() => ({
+    hasPermission: (permission: Permission) => role ? checkPermission(role, permission) : false,
+    hasAnyPermission: (requiredPermissions: Permission[]) => role ? checkAnyPermissions(role, requiredPermissions) : false,
+    hasAllPermissions: (requiredPermissions: Permission[]) => role ? checkAllPermissions(role, requiredPermissions) : false,
+  }), [role]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      user,
-      status,
-
-      isAuthenticated:
-        status === "authenticated",
-
-      role,
-      permissions,
-
-      hasPermission:
-        permissionChecker.hasPermission,
-
-      hasAnyPermission:
-        permissionChecker.hasAnyPermission,
-
-      hasAllPermissions:
-        permissionChecker.hasAllPermissions,
-
-      refreshUser,
-      clearSession,
-      logout,
+      user, status, isAuthenticated: status === "authenticated",
+      role, permissions,
+      hasPermission: permissionChecker.hasPermission,
+      hasAnyPermission: permissionChecker.hasAnyPermission,
+      hasAllPermissions: permissionChecker.hasAllPermissions,
+      refreshUser, clearSession, logout, switchRole,
     }),
-    [
-      user,
-      status,
-      role,
-      permissions,
-      permissionChecker,
-    ],
+    [user, status, role, permissions, permissionChecker]
   );
 
   return (
@@ -191,14 +108,7 @@ export function AuthProvider({
 }
 
 export function useAuth(): AuthContextValue {
-  const context =
-    useContext(AuthContext);
-
-  if (!context) {
-    throw new Error(
-      "useAuth must be used inside AuthProvider.",
-    );
-  }
-
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used inside AuthProvider.");
   return context;
 }

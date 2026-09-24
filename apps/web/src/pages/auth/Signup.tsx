@@ -268,9 +268,7 @@ function Signup({ onBack }: SignupProps) {
   return (
     <main className="signup-page">
       <section className="signup-panel">
-        <div className="signup-brand">
-          ONBID
-        </div>
+        <div className="signup-brand"><img src="/auctions/onbid-logo.png" alt="ONBID" style={{ height: "70px", width: "100%", maxWidth: "250px", objectFit: "contain", marginBottom: "20px" }} /></div>
 
         <div className="signup-live">
           <span />

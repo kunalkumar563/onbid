@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import HomeHeader from "./HomeHeader";
 import "./Home.css";
 
-import artImage from "../../assets/auctions/art/art-01.png";
-import electronicsImage from "../../assets/auctions/electronics/electronics-01.png";
-import fashionImage from "../../assets/auctions/fashion/fashion-01.png";
-import homeImage from "../../assets/auctions/home/home-01.png";
-import jewelryImage from "../../assets/auctions/jewelry/jewelry-01.png";
-import sportsImage from "../../assets/auctions/sports/sports-01.png";
+const artImage = "/auctions/art/art-01.png";
+const electronicsImage = "/auctions/electronics/electronics-01.png";
+const fashionImage = "/auctions/fashion/fashion-01.png";
+const homeImage = "/auctions/home/home-01.png";
+const jewelryImage = "/auctions/jewelry/jewelry-01.png";
+const sportsImage = "/auctions/sports/sports-01.png";
 
 type Category = {
   name: string;
@@ -73,6 +73,7 @@ const categories: Category[] = [
 
 const featuredAuctions: Auction[] = [
   {
+    id: "electronics-demo-1",
     lot: "LOT 01",
     title: "The Collector's Camera",
     category: "Electronics",
@@ -81,6 +82,7 @@ const featuredAuctions: Auction[] = [
     image: electronicsImage,
   },
   {
+    id: "art_collectibles-demo-1",
     lot: "LOT 02",
     title: "The Harbor at Dusk",
     category: "Art & Collectibles",
@@ -89,6 +91,7 @@ const featuredAuctions: Auction[] = [
     image: artImage,
   },
   {
+    id: "fashion-demo-1",
     lot: "LOT 03",
     title: "The Collector's Edit",
     category: "Fashion",
@@ -97,6 +100,7 @@ const featuredAuctions: Auction[] = [
     image: fashionImage,
   },
   {
+    id: "jewelry_watches-demo-1",
     lot: "LOT 04",
     title: "The Royal Collection",
     category: "Jewelry & Watches",
@@ -108,6 +112,7 @@ const featuredAuctions: Auction[] = [
 
 const liveAuctions: Auction[] = [
   {
+    id: "jewelry_watches-demo-2",
     lot: "LIVE 01",
     title: "Royal Collection",
     category: "Jewelry & Watches",
@@ -116,6 +121,7 @@ const liveAuctions: Auction[] = [
     image: jewelryImage,
   },
   {
+    id: "art_collectibles-demo-2",
     lot: "LIVE 02",
     title: "The Harbor at Dusk",
     category: "Art & Collectibles",
@@ -124,6 +130,7 @@ const liveAuctions: Auction[] = [
     image: artImage,
   },
   {
+    id: "stationery_office-demo-1",
     lot: "LIVE 03",
     title: "The Collector's Desk",
     category: "Stationery & Office",
@@ -161,7 +168,7 @@ const trustItems = [
 ];
 
 function getCategoryUrl(slug: string) {
-  return `/auctions?category=${encodeURIComponent(slug)}`;
+  return `/category/${encodeURIComponent(slug)}`;
 }
 
 export default function Home() {
@@ -188,12 +195,12 @@ export default function Home() {
             </p>
 
             <div className="hero-buttons">
-              <Link to="/auctions" className="hero-primary">
+              <Link to="/category/all" className="hero-primary">
                 Explore Auctions
                 <span>↗</span>
               </Link>
 
-              <Link to="/auctions" className="hero-secondary">
+              <Link to="/category/all" className="hero-secondary">
                 Browse All Auctions
               </Link>
             </div>
@@ -323,7 +330,7 @@ export default function Home() {
               </h2>
             </div>
 
-            <Link to="/auctions">
+            <Link to="/category/all">
               View all auctions →
             </Link>
           </div>
@@ -335,7 +342,7 @@ export default function Home() {
                 className="auction-card"
               >
                 <Link
-                  to="/auctions"
+                  to={`/auctions/${(auction as any).id}`}
                   className="auction-card-image"
                 >
                   <img
@@ -380,7 +387,7 @@ export default function Home() {
                   </div>
 
                   <Link
-                    to="/auctions"
+                    to={`/auctions/${(auction as any).id}`}
                     className="auction-card-button"
                   >
                     View Auctions
@@ -425,7 +432,7 @@ export default function Home() {
               </h2>
             </div>
 
-            <Link to="/auctions">
+            <Link to="/category/all">
               Enter live auctions →
             </Link>
           </div>
@@ -465,7 +472,7 @@ export default function Home() {
               </div>
 
               <Link
-                to="/auctions"
+                to="/auctions/jewelry_watches-demo-2"
                 className="dark-button"
               >
                 Explore Auctions
@@ -478,7 +485,7 @@ export default function Home() {
             {liveAuctions.map((auction) => (
               <Link
                 key={auction.lot}
-                to="/auctions"
+                to={`/auctions/${(auction as any).id}`}
                 className="live-mini-card"
               >
                 <div className="live-mini-image">
@@ -534,7 +541,7 @@ export default function Home() {
 
           <div className="seller-mark">
             <div>◇</div>
-            <span>ONBID</span>
+            <img src="/auctions/onbid-logo.png" alt="ONBID" style={{ height: "30px" }} />
           </div>
         </section>
 
@@ -579,7 +586,7 @@ export default function Home() {
 
           <div className="hero-buttons">
             <Link
-              to="/auctions"
+              to="/category/all"
               className="hero-primary"
             >
               Explore Auctions
@@ -600,7 +607,7 @@ export default function Home() {
       <footer className="home-footer">
         <div className="footer-brand">
           <div className="footer-logo">
-            ONBID<sup>™</sup>
+            <img src="/auctions/onbid-logo.png" alt="ONBID" style={{ height: "60px", objectFit: "contain", objectPosition: "left" }} />
           </div>
 
           <p>
@@ -614,7 +621,7 @@ export default function Home() {
         <div className="footer-column">
           <strong>MARKETPLACE</strong>
 
-          <Link to="/auctions">
+          <Link to="/category/all">
             All Auctions
           </Link>
 
@@ -626,7 +633,7 @@ export default function Home() {
             Wishlist
           </Link>
 
-          <Link to="/auctions">
+          <Link to="/category/all">
             Categories
           </Link>
         </div>

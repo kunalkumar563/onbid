@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import type { UserRole } from "../../types/auth";
@@ -67,8 +67,10 @@ function DashboardHeader({
         </button>
 
         <div className="dashboard-page-context">
-          <span>ONBID</span>
-
+          <Link to="/">
+            <img src="/auctions/onbid-logo.png" alt="ONBID" style={{ height: "40px", width: "auto", maxWidth: "140px", objectFit: "contain", objectPosition: "left" }} />
+          </Link>
+          
           <strong>
             {ROLE_LABELS[role]} Workspace
           </strong>

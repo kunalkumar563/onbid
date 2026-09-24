@@ -1,417 +1,83 @@
-import {
-  FormEvent,
-  useMemo,
-  useState,
-} from "react";
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
-
-import DashboardLayout from "../../components/dashboard/DashboardLayout";
-import { listingService } from "../../services/listing";
-import { ApiError } from "../../services/api/client";
-import type { ListingCategory } from "../../types/listing";
-import {
-  LISTING_CATEGORIES,
-  getCategoryMinimumPrice,
-  getCategoryLabel,
-  getSubCategories,
-  getSubCategoryLabel,
-  getSubSubCategories,
-} from "../../config/categories";
-
-type FormState = {
-  title: string;
-  category: ListingCategory | "";
-  subCategory: string;
-  subSubCategory: string;
-  description: string;
-  startingPrice: string;
-  auctionDuration: string;
-  sellerLocation: string;
-  photos: string[];
-};
-
-const INITIAL_FORM: FormState = {
-  title: "",
-  category: "",
-  subCategory: "",
-  subSubCategory: "",
-  description: "",
-  startingPrice: "",
-  auctionDuration: "",
-  sellerLocation: "",
-  photos: [],
-};
-
-const MAX_PHOTOS = 10;
-const MAX_TITLE_LENGTH = 160;
-const MAX_DESCRIPTION_LENGTH = 5000;
-const MAX_LOCATION_LENGTH = 200;
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '../../components/dashboard/DashboardLayout';
+import { listingService } from '../../services/listing';
+import './CreateListing.css';
 
 export default function CreateListing() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState<FormState>(
-    INITIAL_FORM,
-  );
-
-  const [photoUrl, setPhotoUrl] = useState("");
+  const [formData, setFormData] = useState({
+    title: '',
+    category: '',
+    subcategory: '',
+    location: '',
+    startingBid: '',
+    bidIncrement: '',
+    duration: '',
+    startDate: '',
+    startTime: '',
+    condition: '',
+    dimensions: '',
+    brand: '',
+    weight: '',
+    material: '',
+    color: '',
+    year: '',
+    included: '',
+    description: '',
+    shippingAvailable: true,
+    shippingMethod: '',
+    shippingCost: '',
+    deliveryTime: '',
+    returnsAccepted: '',
+    authenticConfirm: true
+  });
+  
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [photoInput, setPhotoInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const subCategories = useMemo(() => {
-    if (!form.category) {
-      return [];
-    }
-
-    return getSubCategories(form.category);
-  }, [form.category]);
-
-  const subSubCategories = useMemo(() => {
-    if (!form.subCategory) {
-      return [];
-    }
-
-    return getSubSubCategories(form.subCategory);
-  }, [form.subCategory]);
-
-  const minimumPrice = useMemo(() => {
-    if (!form.category) {
-      return 0;
-    }
-
-    return getCategoryMinimumPrice(form.category);
-  }, [form.category]);
-
-  const selectedCategoryLabel = useMemo(() => {
-    if (!form.category) {
-      return "";
-    }
-
-    return getCategoryLabel(form.category);
-  }, [form.category]);
-
-  const selectedSubCategoryLabel = useMemo(() => {
-    if (!form.category || !form.subCategory) {
-      return "";
-    }
-
-    return getSubCategoryLabel(
-      form.category,
-      form.subCategory,
-    );
-  }, [form.category, form.subCategory]);
-
-  const selectedSubSubCategoryLabel = useMemo(() => {
-    if (!form.subCategory || !form.subSubCategory) {
-      return "";
-    }
-
-    return getSubSubCategories(form.subCategory).find(
-      (item) => item.value === form.subSubCategory,
-    )?.label ?? form.subSubCategory;
-  }, [form.subCategory, form.subSubCategory]);
-
-  const updateField = <K extends keyof FormState>(
-    field: K,
-    value: FormState[K],
-  ) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
-
-    setError(null);
   };
 
-  const handleCategoryChange = (
-    value: ListingCategory | "",
-  ) => {
-    setForm((current) => ({
-      ...current,
-      category: value,
-      subCategory: "",
-      subSubCategory: "",
-      startingPrice: "",
-    }));
-
-    setError(null);
+  const handleToggleShipping = () => {
+    setFormData(prev => ({ ...prev, shippingAvailable: !prev.shippingAvailable }));
   };
 
-  const handleSubCategoryChange = (
-    value: string,
-  ) => {
-    setForm((current) => ({
-      ...current,
-      subCategory: value,
-      subSubCategory: "",
-    }));
-
-    setError(null);
+  const handleAddPhoto = () => {
+    if (photoInput && photos.length < 10) {
+      setPhotos(prev => [...prev, photoInput]);
+      setPhotoInput('');
+    }
   };
 
-  const handlePriceChange = (value: string) => {
-    if (value === "") {
-      updateField("startingPrice", "");
-      return;
-    }
-
-    const numericValue = Number(value);
-
-    if (!Number.isFinite(numericValue)) {
-      return;
-    }
-
-    updateField("startingPrice", value);
-  };
-
-  const addPhoto = () => {
-    const value = photoUrl.trim();
-
-    if (!value) {
-      setError("Enter a photo URL before adding it.");
-      return;
-    }
-
-    if (form.photos.length >= MAX_PHOTOS) {
-      setError(
-        `You can add a maximum of ${MAX_PHOTOS} listing photos.`,
-      );
-      return;
-    }
-
-    try {
-      const url = new URL(value);
-
-      if (
-        url.protocol !== "http:" &&
-        url.protocol !== "https:"
-      ) {
-        throw new Error();
-      }
-    } catch {
-      setError("Please enter a valid photo URL.");
-      return;
-    }
-
-    if (form.photos.includes(value)) {
-      setError(
-        "This photo URL has already been added.",
-      );
-      return;
-    }
-
-    updateField("photos", [
-      ...form.photos,
-      value,
-    ]);
-
-    setPhotoUrl("");
-  };
-
-  const removePhoto = (photo: string) => {
-    updateField(
-      "photos",
-      form.photos.filter(
-        (item) => item !== photo,
-      ),
-    );
-  };
-
-  const validateCategoryHierarchy = () => {
-    if (!form.category) {
-      return "Please select a listing category.";
-    }
-
-    const validSubCategory = subCategories.some(
-      (item) => item.value === form.subCategory,
-    );
-
-    if (!form.subCategory || !validSubCategory) {
-      return "Please select a valid sub-category.";
-    }
-
-    const validSubSubCategory =
-      subSubCategories.some(
-        (item) =>
-          item.value === form.subSubCategory,
-      );
-
-    if (
-      !form.subSubCategory ||
-      !validSubSubCategory
-    ) {
-      return "Please select a valid sub-sub-category.";
-    }
-
-    return null;
-  };
-
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>,
-  ) => {
-    event.preventDefault();
-
-    setError(null);
-
-    const title = form.title.trim();
-    const description = form.description.trim();
-    const sellerLocation =
-      form.sellerLocation.trim();
-
-    const startingPrice =
-      Number(form.startingPrice);
-
-    const auctionDuration =
-      Number(form.auctionDuration);
-
-    if (!title) {
-      setError("Listing title is required.");
-      return;
-    }
-
-    if (title.length < 3) {
-      setError(
-        "Listing title must contain at least 3 characters.",
-      );
-      return;
-    }
-
-    if (title.length > MAX_TITLE_LENGTH) {
-      setError(
-        `Listing title cannot exceed ${MAX_TITLE_LENGTH} characters.`,
-      );
-      return;
-    }
-
-    const categoryError =
-      validateCategoryHierarchy();
-
-    if (categoryError) {
-      setError(categoryError);
-      return;
-    }
-
-    if (!description) {
-      setError(
-        "Listing description is required.",
-      );
-      return;
-    }
-
-    if (description.length < 20) {
-      setError(
-        "Please provide a more detailed description.",
-      );
-      return;
-    }
-
-    if (
-      description.length >
-      MAX_DESCRIPTION_LENGTH
-    ) {
-      setError(
-        `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`,
-      );
-      return;
-    }
-
-    if (
-      !Number.isFinite(startingPrice) ||
-      startingPrice <= 0
-    ) {
-      setError(
-        "Starting price must be greater than zero.",
-      );
-      return;
-    }
-
-    if (startingPrice < minimumPrice) {
-      setError(
-        `Starting price must be at least ₹${minimumPrice.toLocaleString(
-          "en-IN",
-        )} for ${selectedCategoryLabel}.`,
-      );
-      return;
-    }
-
-    if (
-      !Number.isInteger(auctionDuration) ||
-      auctionDuration <= 0
-    ) {
-      setError(
-        "Auction duration must be a positive whole number.",
-      );
-      return;
-    }
-
-    if (auctionDuration > 365) {
-      setError(
-        "Auction duration cannot exceed 365 days.",
-      );
-      return;
-    }
-
-    if (!sellerLocation) {
-      setError(
-        "Seller location is required.",
-      );
-      return;
-    }
-
-    if (
-      sellerLocation.length >
-      MAX_LOCATION_LENGTH
-    ) {
-      setError(
-        `Seller location cannot exceed ${MAX_LOCATION_LENGTH} characters.`,
-      );
-      return;
-    }
-
-    if (form.photos.length === 0) {
-      setError(
-        "Add at least one listing photo.",
-      );
-      return;
-    }
-
-    if (form.photos.length > MAX_PHOTOS) {
-      setError(
-        `You can add a maximum of ${MAX_PHOTOS} listing photos.`,
-      );
-      return;
-    }
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title) return alert("Title is required!");
+    if (!formData.startingBid) return alert("Starting bid is required!");
+    if (photos.length === 0) return alert("At least one photo URL is required!");
+    
     setIsSubmitting(true);
-
     try {
-      const listing =
-        await listingService.create({
-          title,
-          category: form.category as ListingCategory,
-          subCategory: form.subCategory,
-          subSubCategory: form.subSubCategory,
-          description,
-          startingPrice,
-          auctionDuration,
-          photos: form.photos,
-          sellerLocation,
-        });
-
+      const listing = await listingService.create({
+        title: formData.title,
+        category: (formData.category || "home_garden") as any,
+        subCategory: formData.subcategory,
+        description: formData.description,
+        startingPrice: Number(formData.startingBid),
+        auctionDuration: Number(formData.duration) || 7,
+        photos: photos,
+        sellerLocation: formData.location
+      });
       navigate(`/listings/${listing.id}`);
-    } catch (requestError) {
-      if (
-        requestError instanceof ApiError
-      ) {
-        setError(requestError.message);
-      } else {
-        setError(
-          "Unable to create the listing. Please try again.",
-        );
-      }
+    } catch (err) {
+      alert("Error creating listing");
     } finally {
       setIsSubmitting(false);
     }
@@ -419,570 +85,318 @@ export default function CreateListing() {
 
   return (
     <DashboardLayout role="seller">
-      <div className="dashboard-page">
-        <section className="dashboard-page-heading">
+      <div className="create-listing-page">
+        
+        {/* Top Header */}
+        <div className="cl-header-row">
           <div>
-            <span className="dashboard-eyebrow">
-              SELLER WORKSPACE
-            </span>
+            <h1>Create New Listing</h1>
+            <p>Complete the details below to list your item for auction.</p>
+          </div>
+          <div className="cl-header-actions">
+            <button type="button" className="cl-btn-secondary" onClick={() => navigate('/my-listings')}>Cancel</button>
+            <button type="button" className="cl-btn-secondary">Save as Draft</button>
+            <button type="button" className="cl-btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit for Verification"}
+            </button>
+          </div>
+        </div>
 
-            <h1>
-              Create
-              <br />
-              <em>your listing.</em>
-            </h1>
+        {/* Masonry Layout */}
+        <div className="cl-masonry-grid">
+          
+          {/* Left Column */}
+          <div className="cl-col-left">
+            
+            {/* Card 1 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">1</div>
+                <div className="cl-card-title">
+                  <h2>Basic Information</h2>
+                  <p>Start with the essential details</p>
+                </div>
+              </div>
+
+              <div className="cl-form-group">
+                <div className="cl-form-label"><span>Item Title</span><span className="req">*</span></div>
+                <input type="text" name="title" value={formData.title} onChange={handleChange} className="cl-input" placeholder="e.g. Vintage 1960s Murano Glass Chandelier" required />
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Category</span><span className="req">*</span></div>
+                  <select name="category" value={formData.category} onChange={handleChange} className="cl-input" required>
+                    <option value="">Select category</option>
+                    <option value="home_garden">Home & Garden</option>
+                    <option value="art_collectibles">Art & Collectibles</option>
+                    <option value="jewelry_watches">Jewelry & Watches</option>
+                    <option value="fashion">Fashion</option>
+                  </select>
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Subcategory</span></div>
+                  <select name="subcategory" value={formData.subcategory} onChange={handleChange} className="cl-input">
+                    <option value="">Select subcategory</option>
+                    <option value="Lighting">Lighting</option>
+                    <option value="Furniture">Furniture</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="cl-form-group">
+                <div className="cl-form-label"><span>Item Location</span><span className="req">*</span></div>
+                <input type="text" name="location" value={formData.location} onChange={handleChange} className="cl-input" placeholder="e.g. Mumbai, India" required />
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">2</div>
+                <div className="cl-card-title">
+                  <h2>Auction Settings</h2>
+                  <p>Set your pricing and schedule</p>
+                </div>
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Starting Bid (₹)</span><span className="req">*</span></div>
+                  <input type="number" name="startingBid" value={formData.startingBid} onChange={handleChange} className="cl-input" placeholder="0" required />
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Bid Increment (₹)</span></div>
+                  <input type="number" name="bidIncrement" value={formData.bidIncrement} onChange={handleChange} className="cl-input" placeholder="500" />
+                </div>
+              </div>
+
+              <div className="cl-form-group">
+                <div className="cl-form-label"><span>Auction Duration (Days)</span><span className="req">*</span></div>
+                <select name="duration" value={formData.duration} onChange={handleChange} className="cl-input" required>
+                  <option value="">Select duration</option>
+                  <option value="3">3 Days</option>
+                  <option value="5">5 Days</option>
+                  <option value="7">7 Days</option>
+                  <option value="14">14 Days</option>
+                </select>
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Start Date</span></div>
+                  <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className="cl-input" />
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Start Time</span></div>
+                  <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} className="cl-input" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">3</div>
+                <div className="cl-card-title">
+                  <h2>Item Details</h2>
+                  <p>Provide specific characteristics</p>
+                </div>
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Condition</span><span className="req">*</span></div>
+                  <select name="condition" value={formData.condition} onChange={handleChange} className="cl-input" required>
+                    <option value="">Select condition</option>
+                    <option value="Mint">Mint / Like New</option>
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                  </select>
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Dimensions (LxWxH)</span></div>
+                  <input type="text" name="dimensions" value={formData.dimensions} onChange={handleChange} className="cl-input" placeholder="e.g. 80x80x120 cm" />
+                </div>
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Brand</span></div>
+                  <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="cl-input" placeholder="e.g. Baccarat" />
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Weight</span></div>
+                  <input type="text" name="weight" value={formData.weight} onChange={handleChange} className="cl-input" placeholder="e.g. 15 kg" />
+                </div>
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Material</span></div>
+                  <input type="text" name="material" value={formData.material} onChange={handleChange} className="cl-input" placeholder="e.g. Crystal, Brass" />
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Color</span></div>
+                  <input type="text" name="color" value={formData.color} onChange={handleChange} className="cl-input" placeholder="e.g. Clear, Gold" />
+                </div>
+              </div>
+
+              <div className="cl-form-row">
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>Year (if known)</span></div>
+                  <input type="text" name="year" value={formData.year} onChange={handleChange} className="cl-input" placeholder="e.g. 1980" />
+                </div>
+                <div className="cl-form-group">
+                  <div className="cl-form-label"><span>What's Included</span></div>
+                  <input type="text" name="included" value={formData.included} onChange={handleChange} className="cl-input" placeholder="e.g. Chandelier, mounting kit" />
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">4</div>
+                <div className="cl-card-title">
+                  <h2>Description</h2>
+                  <p>Share the story behind your item</p>
+                </div>
+              </div>
+
+              <div className="cl-form-group">
+                <textarea 
+                  name="description"
+                  className="cl-input cl-textarea" 
+                  style={{minHeight: '200px'}}
+                  placeholder="Describe the item's condition, history, unique features..."
+                  value={formData.description}
+                  onChange={handleChange}
+                ></textarea>
+              </div>
+            </div>
+
           </div>
 
-          <p>
-            Add accurate item information and
-            supporting photographs before
-            submitting your listing for
-            verification.
-          </p>
-        </section>
-
-        <form onSubmit={handleSubmit}>
-          <section className="dashboard-panel">
-            <div className="dashboard-panel-header">
-              <div>
-                <span>
-                  ITEM INFORMATION
-                </span>
-
-                <h2>
-                  Listing details
-                </h2>
+          {/* Right Column */}
+          <div className="cl-col-right">
+            
+            {/* Card 5 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">5</div>
+                <div className="cl-card-title">
+                  <h2>Listing Media</h2>
+                  <p>Upload high-quality images</p>
+                </div>
               </div>
 
-              <Link
-                to="/my-listings"
-                className="dashboard-panel-link"
-              >
-                Cancel
-              </Link>
+              <div style={{display: 'flex', gap: '10px', marginBottom: '20px'}}>
+                <input 
+                  type="text" 
+                  className="cl-input" 
+                  placeholder="Paste image URL here..." 
+                  value={photoInput} 
+                  onChange={e => setPhotoInput(e.target.value)} 
+                />
+                <button type="button" onClick={handleAddPhoto} className="cl-btn-secondary" style={{padding: '0 15px'}}>Add</button>
+              </div>
+
+              <div className="cl-media-grid" style={{flexWrap: 'wrap'}}>
+                {photos.map((p, i) => (
+                  <div key={i} className="cl-media-box filled">
+                    <img src={p} alt={`Upload ${i}`} onError={(e) => { e.currentTarget.src = '/auctions/art/art-01.png'; }} />
+                    {i === 0 && <div className="cl-primary-badge">👑 Primary</div>}
+                  </div>
+                ))}
+                {photos.length < 10 && (
+                  <div className="cl-media-box">+</div>
+                )}
+              </div>
             </div>
 
-            <div className="dashboard-panel-body">
-              <div className="dashboard-form-grid">
-                <div className="dashboard-field dashboard-field-full">
-                  <label htmlFor="listing-title">
-                    Title
-                  </label>
-
-                  <input
-                    id="listing-title"
-                    name="title"
-                    type="text"
-                    value={form.title}
-                    onChange={(event) =>
-                      updateField(
-                        "title",
-                        event.target.value,
-                      )
-                    }
-                    placeholder="Enter a clear item title"
-                    maxLength={
-                      MAX_TITLE_LENGTH
-                    }
-                    disabled={isSubmitting}
-                    required
-                  />
-
-                  <small>
-                    {form.title.length}/
-                    {MAX_TITLE_LENGTH} characters
-                  </small>
-                </div>
-
-                <div className="dashboard-field">
-                  <label htmlFor="listing-category">
-                    Category
-                  </label>
-
-                  <select
-                    id="listing-category"
-                    name="category"
-                    value={form.category}
-                    onChange={(event) =>
-                      handleCategoryChange(
-                        event.target
-                          .value as
-                          | ListingCategory
-                          | "",
-                      )
-                    }
-                    disabled={isSubmitting}
-                    required
-                  >
-                    <option value="">
-                      Select category
-                    </option>
-
-                    {LISTING_CATEGORIES.map(
-                      (category) => (
-                        <option
-                          key={category.value}
-                          value={
-                            category.value
-                          }
-                        >
-                          {category.label}
-                        </option>
-                      ),
-                    )}
-                  </select>
-
-                  {form.category && (
-                    <small>
-                      Minimum starting price: ₹
-                      {minimumPrice.toLocaleString(
-                        "en-IN",
-                      )}
-                    </small>
-                  )}
-                </div>
-
-                <div className="dashboard-field">
-                  <label htmlFor="listing-sub-category">
-                    Sub-category
-                  </label>
-
-                  <select
-                    id="listing-sub-category"
-                    name="subCategory"
-                    value={form.subCategory}
-                    onChange={(event) =>
-                      handleSubCategoryChange(
-                        event.target.value,
-                      )
-                    }
-                    disabled={
-                      isSubmitting ||
-                      !form.category
-                    }
-                    required
-                  >
-                    <option value="">
-                      {form.category
-                        ? "Select sub-category"
-                        : "Select category first"}
-                    </option>
-
-                    {subCategories.map(
-                      (subCategory) => (
-                        <option
-                          key={
-                            subCategory.value
-                          }
-                          value={
-                            subCategory.value
-                          }
-                        >
-                          {subCategory.label}
-                        </option>
-                      ),
-                    )}
-                  </select>
-                </div>
-
-                <div className="dashboard-field">
-                  <label htmlFor="listing-sub-sub-category">
-                    Sub-sub-category
-                  </label>
-
-                  <select
-                    id="listing-sub-sub-category"
-                    name="subSubCategory"
-                    value={
-                      form.subSubCategory
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "subSubCategory",
-                        event.target.value,
-                      )
-                    }
-                    disabled={
-                      isSubmitting ||
-                      !form.subCategory
-                    }
-                    required
-                  >
-                    <option value="">
-                      {form.subCategory
-                        ? "Select sub-sub-category"
-                        : "Select sub-category first"}
-                    </option>
-
-                    {subSubCategories.map(
-                      (subSubCategory) => (
-                        <option
-                          key={
-                            subSubCategory.value
-                          }
-                          value={
-                            subSubCategory.value
-                          }
-                        >
-                          {
-                            subSubCategory.label
-                          }
-                        </option>
-                      ),
-                    )}
-                  </select>
-                </div>
-
-                <div className="dashboard-field">
-                  <label htmlFor="listing-location">
-                    Seller location
-                  </label>
-
-                  <input
-                    id="listing-location"
-                    name="sellerLocation"
-                    type="text"
-                    value={
-                      form.sellerLocation
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "sellerLocation",
-                        event.target.value,
-                      )
-                    }
-                    placeholder="City, state"
-                    maxLength={
-                      MAX_LOCATION_LENGTH
-                    }
-                    disabled={isSubmitting}
-                    required
-                  />
-                </div>
-
-                <div className="dashboard-field">
-                  <label htmlFor="listing-price">
-                    Starting price
-                  </label>
-
-                  <input
-                    id="listing-price"
-                    name="startingPrice"
-                    type="number"
-                    value={
-                      form.startingPrice
-                    }
-                    onChange={(event) =>
-                      handlePriceChange(
-                        event.target.value,
-                      )
-                    }
-                    placeholder={
-                      minimumPrice > 0
-                        ? String(
-                            minimumPrice,
-                          )
-                        : "0"
-                    }
-                    min={
-                      minimumPrice > 0
-                        ? minimumPrice
-                        : 1
-                    }
-                    step="0.01"
-                    disabled={
-                      isSubmitting ||
-                      !form.category
-                    }
-                    required
-                  />
-
-                  {minimumPrice > 0 && (
-                    <small>
-                      Category minimum: ₹
-                      {minimumPrice.toLocaleString(
-                        "en-IN",
-                      )}
-                    </small>
-                  )}
-                </div>
-
-                <div className="dashboard-field">
-                  <label htmlFor="listing-duration">
-                    Auction duration
-                  </label>
-
-                  <input
-                    id="listing-duration"
-                    name="auctionDuration"
-                    type="number"
-                    value={
-                      form.auctionDuration
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "auctionDuration",
-                        event.target.value,
-                      )
-                    }
-                    placeholder="Number of days"
-                    min="1"
-                    max="365"
-                    step="1"
-                    disabled={isSubmitting}
-                    required
-                  />
-
-                  <small>
-                    Enter a whole number of
-                    days, up to 365.
-                  </small>
-                </div>
-
-                <div className="dashboard-field dashboard-field-full">
-                  <label htmlFor="listing-description">
-                    Description
-                  </label>
-
-                  <textarea
-                    id="listing-description"
-                    name="description"
-                    value={
-                      form.description
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        "description",
-                        event.target.value,
-                      )
-                    }
-                    placeholder="Describe the item's condition, specifications and any relevant details..."
-                    rows={7}
-                    maxLength={
-                      MAX_DESCRIPTION_LENGTH
-                    }
-                    disabled={isSubmitting}
-                    required
-                  />
-
-                  <small>
-                    {form.description.length}/
-                    {MAX_DESCRIPTION_LENGTH}{" "}
-                    characters. Keep the
-                    description factual and
-                    consistent with the physical
-                    item.
-                  </small>
+            {/* Card 6 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">6</div>
+                <div className="cl-card-title">
+                  <h2>Shipping & Returns</h2>
+                  <p>Provide shipping information</p>
                 </div>
               </div>
 
-              {form.category && (
-                <div
-                  style={{
-                    marginTop: "24px",
-                    padding: "18px 20px",
-                    border:
-                      "1px solid rgba(91, 61, 255, 0.14)",
-                    borderRadius: "14px",
-                    background:
-                      "rgba(91, 61, 255, 0.035)",
-                  }}
-                >
-                  <small
-                    style={{
-                      display: "block",
-                      marginBottom: "8px",
-                      letterSpacing:
-                        "0.08em",
-                      textTransform:
-                        "uppercase",
-                    }}
-                  >
-                    Selected category
-                  </small>
+              <div className="cl-toggle-row">
+                <span style={{fontSize: '14px', fontWeight: 600, color: '#333'}}>Shipping available</span>
+                <div className={`cl-toggle ${formData.shippingAvailable ? 'active' : ''}`} onClick={handleToggleShipping}></div>
+              </div>
 
-                  <strong>
-                    {selectedCategoryLabel}
-                  </strong>
+              {formData.shippingAvailable && (
+                <>
+                  <div className="cl-form-row">
+                    <div className="cl-form-group">
+                      <div className="cl-form-label"><span>Shipping method</span></div>
+                      <select name="shippingMethod" value={formData.shippingMethod} onChange={handleChange} className="cl-input">
+                        <option value="">Select method</option>
+                        <option value="FedEx">FedEx / DHL</option>
+                        <option value="Local Courier">Local Courier</option>
+                        <option value="Self Pickup">Self Pickup</option>
+                      </select>
+                    </div>
+                    <div className="cl-form-group">
+                      <div className="cl-form-label"><span>Shipping cost (₹)</span></div>
+                      <input type="number" name="shippingCost" value={formData.shippingCost} onChange={handleChange} className="cl-input" placeholder="0" />
+                    </div>
+                  </div>
 
-                  {selectedSubCategoryLabel && (
-                    <>
-                      {" "}
-                      /{" "}
-                      {selectedSubCategoryLabel}
-                    </>
-                  )}
-
-                  {selectedSubSubCategoryLabel && (
-                    <>
-                      {" "}
-                      /{" "}
-                      {
-                        selectedSubSubCategoryLabel
-                      }
-                    </>
-                  )}
-                </div>
+                  <div className="cl-form-row">
+                    <div className="cl-form-group">
+                      <div className="cl-form-label"><span>Estimated delivery</span></div>
+                      <input type="text" name="deliveryTime" value={formData.deliveryTime} onChange={handleChange} className="cl-input" placeholder="e.g. 3-7 business days" />
+                    </div>
+                    <div className="cl-form-group">
+                      <div className="cl-form-label"><span>Returns accepted</span></div>
+                      <select name="returnsAccepted" value={formData.returnsAccepted} onChange={handleChange} className="cl-input">
+                        <option value="">Select policy</option>
+                        <option value="No Returns">No Returns</option>
+                        <option value="14 Days">14 Days</option>
+                        <option value="30 Days">30 Days</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
-          </section>
 
-          <section className="dashboard-panel">
-            <div className="dashboard-panel-header">
-              <div>
-                <span>
-                  LISTING MEDIA
-                </span>
-
-                <h2>
-                  Item photographs
-                </h2>
-              </div>
-            </div>
-
-            <div className="dashboard-panel-body">
-              <div className="dashboard-field">
-                <label htmlFor="listing-photo">
-                  Photo URL
-                </label>
-
-                <div className="dashboard-input-row">
-                  <input
-                    id="listing-photo"
-                    type="url"
-                    value={photoUrl}
-                    onChange={(event) => {
-                      setPhotoUrl(
-                        event.target.value,
-                      );
-                      setError(null);
-                    }}
-                    onKeyDown={(event) => {
-                      if (
-                        event.key ===
-                        "Enter"
-                      ) {
-                        event.preventDefault();
-                        addPhoto();
-                      }
-                    }}
-                    placeholder="https://..."
-                    disabled={isSubmitting}
-                  />
-
-                  <button
-                    type="button"
-                    className="dashboard-action"
-                    onClick={addPhoto}
-                    disabled={
-                      isSubmitting ||
-                      form.photos.length >=
-                        MAX_PHOTOS
-                    }
-                  >
-                    <span>
-                      Add photo
-                    </span>
-
-                    <span>+</span>
-                  </button>
+            {/* Card 7 */}
+            <div className="cl-card">
+              <div className="cl-card-header">
+                <div className="cl-step-num">7</div>
+                <div className="cl-card-title">
+                  <h2>Authentication & Verification</h2>
+                  <p>Build trust with buyers</p>
                 </div>
-
-                <small>
-                  Add publicly accessible image
-                  URLs. {form.photos.length}/
-                  {MAX_PHOTOS} photographs added.
-                </small>
               </div>
 
-              {form.photos.length > 0 && (
-                <div className="dashboard-photo-list">
-                  {form.photos.map(
-                    (photo, index) => (
-                      <div
-                        key={photo}
-                        className="dashboard-photo-item"
-                      >
-                        <div>
-                          <strong>
-                            Photo{" "}
-                            {index + 1}
-                          </strong>
+              <div className="cl-checkbox-row">
+                <input type="checkbox" name="authenticConfirm" checked={formData.authenticConfirm} onChange={handleChange} className="cl-checkbox" />
+                <span style={{fontSize: '14px', color: '#333'}}>I confirm that this item is authentic and accurately described.</span>
+              </div>
 
-                          <a
-                            href={photo}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {photo}
-                          </a>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removePhoto(
-                              photo,
-                            )
-                          }
-                          disabled={
-                            isSubmitting
-                          }
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ),
-                  )}
+              <div className="cl-form-group">
+                <div className="cl-form-label" style={{marginBottom: '10px'}}><span>Upload documents (optional)</span></div>
+                <div className="cl-doc-upload" onClick={() => alert('File picker mock opened')}>
+                  <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+                    <span style={{fontSize: '24px', color: '#2c1a4d'}}>↑</span>
+                    <span style={{fontSize: '13px', color: '#666'}}>Upload authentication certificates,<br/>receipts or any supporting documents.</span>
+                  </div>
+                  <button type="button" className="cl-doc-btn">Choose Files</button>
                 </div>
-              )}
-            </div>
-          </section>
-
-          {error && (
-            <div
-              className="password-error"
-              role="alert"
-              aria-live="polite"
-            >
-              {error}
-            </div>
-          )}
-
-          <section className="dashboard-panel">
-            <div className="dashboard-panel-body">
-              <div className="dashboard-actions">
-                <Link
-                  to="/my-listings"
-                  className="dashboard-action"
-                >
-                  <span>
-                    Cancel
-                  </span>
-
-                  <span>←</span>
-                </Link>
-
-                <button
-                  type="submit"
-                  className="dashboard-action"
-                  disabled={isSubmitting}
-                  aria-busy={
-                    isSubmitting
-                  }
-                >
-                  <span>
-                    {isSubmitting
-                      ? "Creating listing..."
-                      : "Create listing"}
-                  </span>
-
-                  <span>→</span>
-                </button>
               </div>
             </div>
-          </section>
-        </form>
+
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
