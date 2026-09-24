@@ -105,6 +105,28 @@ export class BiddingService {
     return payment?.status === 'PAID';
   }
 
+  async getMyBids(userId: string) {
+    const auctions = await this.prisma.auction.findMany({
+      where: {
+        bids: { some: { bidderId: userId } }
+      },
+      include: {
+        bids: { 
+          where: { bidderId: userId }, 
+          orderBy: { amount: 'desc' }, 
+          take: 1 
+        }
+      },
+      orderBy: { endTime: 'asc' }
+    });
+
+    return auctions.map(a => ({
+      auction: a,
+      myHighestBid: a.bids[0]?.amount || 0,
+      isWinning: a.currentBidderId === userId
+    }));
+  }
+
   async placeBid(auctionId: string, bidderId: string, amount: number): Promise<PlaceBidResult> {
     await this.assertKycVerified(bidderId);
     const auction = await this.loadBiddableAuction(auctionId, bidderId);

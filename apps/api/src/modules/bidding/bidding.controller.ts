@@ -15,6 +15,12 @@ export class BiddingController {
    * AuctionDetail page calls this exact path directly — see
    * BiddingService.getAuctionDetail for the Listing-vs-Auction shape split.
    */
+  @UseGuards(JwtAuthGuard)
+  @Get('my/history')
+  getMyBids(@CurrentUser() user: AuthenticatedUser) {
+    return this.biddingService.getMyBids(user.id);
+  }
+
   @Get(':id')
   getAuctionDetail(@Param('id') auctionId: string) {
     return this.biddingService.getAuctionDetail(auctionId);

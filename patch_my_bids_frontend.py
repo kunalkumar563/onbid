@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react';
+import re
+
+with open('apps/web/src/pages/dashboard/bidder/MyBids.tsx', 'r') as f:
+    content = f.read()
+
+new_content = """import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import { api } from '../../../services/api/client';
@@ -107,3 +112,8 @@ export default function MyBids() {
     </DashboardLayout>
   );
 }
+"""
+
+with open('apps/web/src/pages/dashboard/bidder/MyBids.tsx', 'w') as f:
+    f.write(new_content)
+
