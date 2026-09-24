@@ -21,9 +21,10 @@ export const authService = {
   register(
     credentials: RegisterCredentials,
   ): Promise<AuthResponse> {
-    return api.post<AuthResponse, RegisterCredentials>(
+    const { confirmPassword, ...rest } = credentials;
+    return api.post<AuthResponse, any>(
       "/auth/register",
-      credentials,
+      rest,
     );
   },
 
@@ -39,9 +40,10 @@ export const authService = {
   resetPassword(
     payload: ResetPasswordRequest,
   ): Promise<import("../types/auth").AuthResponse> {
-    return api.post<import("../types/auth").AuthResponse, ResetPasswordRequest>(
+    const { confirmPassword, ...rest } = payload;
+    return api.post<import("../types/auth").AuthResponse, any>(
       "/auth/reset-password",
-      payload,
+      rest,
     );
   },
 
