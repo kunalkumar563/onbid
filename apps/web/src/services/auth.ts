@@ -29,8 +29,8 @@ export const authService = {
 
   forgotPassword(
     payload: ForgotPasswordRequest,
-  ): Promise<void> {
-    return api.post<void, ForgotPasswordRequest>(
+  ): Promise<{token?: string}> {
+    return api.post<{token?: string}, ForgotPasswordRequest>(
       "/auth/forgot-password",
       payload,
     );
@@ -38,8 +38,8 @@ export const authService = {
 
   resetPassword(
     payload: ResetPasswordRequest,
-  ): Promise<void> {
-    return api.post<void, ResetPasswordRequest>(
+  ): Promise<import("../types/auth").AuthResponse> {
+    return api.post<import("../types/auth").AuthResponse, ResetPasswordRequest>(
       "/auth/reset-password",
       payload,
     );

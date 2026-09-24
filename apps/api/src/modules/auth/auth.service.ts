@@ -204,9 +204,9 @@ export class AuthService {
    * standard practice so this endpoint can't be used to enumerate
    * registered accounts. Only actually sends an email if it does.
    */
-  async forgotPassword(email: string): Promise<void> {
+  async forgotPassword(email: string): Promise<{token?: string}> {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) return;
+    if (!user) return {};
 
     const rawToken = randomBytes(32).toString('hex');
     const tokenHash = createHash('sha256').update(rawToken).digest('hex');
@@ -227,9 +227,10 @@ export class AuthService {
       'Reset your Onbid password',
       `We received a request to reset your Onbid password. This link expires in 1 hour:\n\n${resetLink}\n\nIf you didn't request this, you can ignore this email.`,
     );
+    return { token: rawToken };
   }
 
-  async resetPassword(rawToken: string, newPassword: string): Promise<void> {
+  async resetPassword(rawToken: string, newPassword: string): Promise<{ user: PublicUser; tokens: AuthTokens }> {
     const tokenHash = createHash('sha256').update(rawToken).digest('hex');
 
     const user = await this.prisma.user.findFirst({
@@ -259,5 +260,10 @@ export class AuthService {
     // session so a stolen-but-not-yet-used old token can't outlive the
     // password that granted it.
     await this.refreshTokens.revokeAllForUser(user.id);
+
+    const updatedUser = await this.prisma.user.findUnique({ where: { id: user.id } });
+    if (!updatedUser) throw new BadRequestException();
+    const tokens = await this.issueTokens(updatedUser);
+    return { user: this.toPublicUser(updatedUser), tokens };
   }
 }

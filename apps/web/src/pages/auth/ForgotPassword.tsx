@@ -52,9 +52,13 @@ function ForgotPassword({
     };
 
     try {
-      await authService.forgotPassword(payload);
+      const response = await authService.forgotPassword(payload);
 
-      setStatus("success");
+      if (response && response.token) {
+        window.location.assign(`/reset-password?token=${response.token}`);
+      } else {
+        setStatus("success");
+      }
     } catch (requestError) {
       if (requestError instanceof ApiError) {
         setError(requestError.message);
