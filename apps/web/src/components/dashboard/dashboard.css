@@ -21,6 +21,7 @@
   background: #17121d;
   color: #f7f4ee;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
 }
 
 .dashboard-sidebar-top {

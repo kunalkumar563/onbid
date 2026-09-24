@@ -428,22 +428,8 @@ export default function HomeHeader() {
         </form>
 
         {/* HOME & ALL CATEGORIES */}
-        <Link
-          to="/"
-          className="mobile-navigation-button"
-          style={{ textDecoration: 'none', fontWeight: 600, color: '#1a1a1a', display: 'block', padding: '15px 0' }}
-          onClick={closeMobileMenu}
-        >
-          Home
-        </Link>
-        <button
-          type="button"
-          className="mobile-navigation-button"
-          style={{ border: 'none', background: 'none', textAlign: 'left', fontWeight: 600, color: '#1a1a1a', display: 'block', padding: '15px 0', cursor: 'pointer', width: '100%' }}
-          onClick={handleAllCategories}
-        >
-          All Categories
-        </button>
+        <Link to="/" className="mobile-navigation-item main-link" onClick={closeMobileMenu}>Home</Link>
+        <button type="button" className="mobile-navigation-item main-link" onClick={handleAllCategories}>All Categories</button>
 
 
 

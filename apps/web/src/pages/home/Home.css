@@ -2480,10 +2480,11 @@
   }
 
   .mobile-navigation.open {
-    max-height: 750px;
+    max-height: calc(100vh - 65px);
+    overflow-y: auto;
 
     padding-top: 15px;
-    padding-bottom: 18px;
+    padding-bottom: 40px;
 
     border-bottom-width: 1px;
   }
@@ -2804,4 +2805,44 @@
 .currency-dropdown-item.active {
   background: #f0ebf5;
   color: var(--purple-dark);
+}
+
+/* MOBILE MENU SPECIFIC FIXES */
+@media (max-width: 700px) {
+  .mobile-search {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid rgba(59, 32, 82, 0.17);
+    border-radius: 24px;
+    padding: 0 15px;
+    height: 44px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+  }
+  .mobile-search span {
+    display: flex;
+    align-items: center;
+    color: #888;
+    margin-right: 10px;
+  }
+  .mobile-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    background: transparent;
+  }
+  
+  .mobile-navigation-item.main-link {
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    color: var(--purple-dark) !important;
+    padding: 12px 0 !important;
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
 }
