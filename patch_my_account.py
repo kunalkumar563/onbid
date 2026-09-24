@@ -1,4 +1,9 @@
-import { useState, useEffect } from 'react';
+import re
+
+with open('apps/web/src/pages/dashboard/bidder/MyAccount.tsx', 'r') as f:
+    content = f.read()
+
+new_content = """import { useState, useEffect } from 'react';
 import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import { useAuth } from '../../../context/AuthContext';
 import { api } from '../../../services/api/client';
@@ -132,3 +137,8 @@ export default function MyAccount() {
     </DashboardLayout>
   );
 }
+"""
+
+with open('apps/web/src/pages/dashboard/bidder/MyAccount.tsx', 'w') as f:
+    f.write(new_content)
+

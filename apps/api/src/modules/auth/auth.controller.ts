@@ -130,6 +130,12 @@ export class AuthController {
     return this.authService.me(user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('me')
+  updateProfile(@CurrentUser() user: AuthenticatedUser, @Body() dto: any) {
+    return this.authService.updateProfile(user.id, dto);
+  }
+
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {

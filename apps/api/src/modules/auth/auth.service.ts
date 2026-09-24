@@ -266,4 +266,17 @@ export class AuthService {
     const tokens = await this.issueTokens(updatedUser);
     return { user: this.toPublicUser(updatedUser), tokens };
   }
+
+  async updateProfile(userId: string, data: any): Promise<PublicUser> {
+    const { fullName, phone, dateOfBirth } = data;
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(fullName !== undefined && { fullName }),
+        ...(phone !== undefined && { phone }),
+        ...(dateOfBirth !== undefined && dateOfBirth !== '' && { dateOfBirth: new Date(dateOfBirth) })
+      }
+    });
+    return this.toPublicUser(user);
+  }
 }
