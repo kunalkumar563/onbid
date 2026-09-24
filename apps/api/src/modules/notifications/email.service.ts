@@ -33,15 +33,24 @@ export class EmailService {
     }
     
     try {
-      await this.resendClient.emails.send({
+      const { data, error } = await this.resendClient.emails.send({
         from: `${this.fromName} <${this.fromEmail}>`,
         to,
         subject,
         text: body,
       });
-      this.logger.log(`Email successfully sent to ${to}`);
+      
+      if (error) {
+        this.logger.error(`Resend API Error: ${error.message}`, error);
+        // Fallback for dev: print the link so you can still test it
+        this.logger.debug(`Could not email ${to}. Email content:\n${body}`);
+        return;
+      }
+      
+      this.logger.log(`Email successfully sent to ${to} (ID: ${data?.id})`);
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}`, error);
+      this.logger.debug(`Could not email ${to}. Email content:\n${body}`);
     }
   }
 }
